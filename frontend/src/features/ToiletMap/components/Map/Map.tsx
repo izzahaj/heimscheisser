@@ -5,7 +5,11 @@ import SetViewOnClick from './SetViewOnClick';
 import CurrentLocationMarker from './CurrentLocationMarker';
 
 const Map = ({ map, position }) => {
+  const [toilets, setToilets] = useState([]);
   const animateRef = useRef(false);
+
+  // api call to retrieve list of toilets here
+
 
   return (
     <MapContainer
