@@ -37,7 +37,7 @@ func main() {
 	toilet.RegisterRoutes(toiletRouter, toiletHandler)
 	review.RegisterRoutes(reviewRouter, reviewHandler)
 
-	if err := r.Run(); err != nil {
+	if err := r.Run(":5000"); err != nil {
 		log.Fatalf("Failed to run server: %v", err)
 	}
 }
