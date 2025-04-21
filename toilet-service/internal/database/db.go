@@ -12,10 +12,10 @@ import (
 var DB *gorm.DB
 
 func ConnectDatabase() error {
-	dsn := os.Getenv("DATABASE_URL")
+	dsn := os.Getenv("DB_URL")
 
 	if dsn == "" {
-		return fmt.Errorf("Environment variable DATABASE_URL is not set")
+		return fmt.Errorf("Environment variable DB_URL is not set")
 	}
 
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
@@ -23,6 +23,8 @@ func ConnectDatabase() error {
 	if err != nil {
 		return fmt.Errorf("Failed to connect to database: %w", err)
 	}
+
+	db.Exec(`CREATE EXTENSION IF NOT EXISTS "uuid-ossp";`)
 
 	if err := db.AutoMigrate(&toilet.Toilet{}); err != nil {
 		return fmt.Errorf("Failed to auto migrate: %w", err)

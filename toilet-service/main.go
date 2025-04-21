@@ -31,11 +31,9 @@ func main() {
 	toiletHandler := toilet.NewHandler(toiletService, reviewService)
 
 	api := r.Group("/api/v1/toilet-service")
-	toiletRouter := toilet.NewRouter(api)
-	reviewRouter := review.NewRouter(toiletRouter)
 
-	toilet.RegisterRoutes(toiletRouter, toiletHandler)
-	review.RegisterRoutes(reviewRouter, reviewHandler)
+	toilet.RegisterRoutes(api, toiletHandler)
+	review.RegisterRoutes(api, reviewHandler)
 
 	if err := r.Run(":5000"); err != nil {
 		log.Fatalf("Failed to run server: %v", err)

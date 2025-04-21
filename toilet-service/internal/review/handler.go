@@ -34,7 +34,7 @@ func (h *Handler) CreateReview(context *gin.Context) {
 }
 
 func (h *Handler) GetAllReviewsByToiletID(context *gin.Context) {
-	toiletID, err := uuid.Parse(context.Param("toiletId"))
+	toiletID, err := uuid.Parse(context.Param("id"))
 
 	if err != nil {
 		context.JSON(http.StatusBadRequest, gin.H{"error": "Invalid toilet ID"})
@@ -67,7 +67,7 @@ func (h *Handler) GetAllReviewsByToiletID(context *gin.Context) {
 }
 
 func (h *Handler) GetReviewByID(context *gin.Context) {
-	id, err := uuid.Parse(context.Param("id"))
+	id, err := uuid.Parse(context.Param("reviewId"))
 
 	if err != nil {
 		context.JSON(http.StatusBadRequest, gin.H{"error": "Invalid ID"})
@@ -122,7 +122,7 @@ func (h *Handler) UpdateReview(context *gin.Context) {
 }
 
 func (h *Handler) DeleteReview(context *gin.Context) {
-	id, err := uuid.Parse(context.Param("id"))
+	id, err := uuid.Parse(context.Param("reviewId"))
 
 	if err != nil {
 		context.JSON(http.StatusBadRequest, gin.H{"error": "Invalid ID"})

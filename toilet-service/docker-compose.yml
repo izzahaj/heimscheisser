@@ -1,0 +1,32 @@
+version: '3.9'
+
+services:
+  toilet-service:
+    build: .
+    depends_on:
+      - postgres-db
+    ports:
+      - "5000:5000"
+    environment:
+      DB_URL: ${DB_URL}
+      ENV: development
+    command: ./main
+    env_file:
+      - .env
+
+  postgres-db:
+    image: postgres:15.4
+    restart: always
+    environment:
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    ports:
+      - ${DB_PORT}:${DB_PORT}
+    volumes:
+      - postgres-db:/var/lib/postgresql/data
+    env_file:
+      - .env
+
+volumes:
+  postgres-db:
