@@ -1,15 +1,15 @@
 import { MapContainer, TileLayer } from 'react-leaflet'
 import { NAVBAR_HEIGHT_REM } from '../../../../common/constants/Dimensions';
-import { useRef } from 'react';
-import SetViewOnClick from './SetViewOnClick';
+import { useRef, useState } from 'react';
 import CurrentLocationMarker from './CurrentLocationMarker';
+import SearchControl from './SearchControl';
+import AddToiletMarker from './AddToiletMarker';
 
-const Map = ({ map, position }) => {
+const Map = ({ map, position, addToiletPosition, setAddToiletPosition, isAddingToilet }) => {
   const [toilets, setToilets] = useState([]);
   const animateRef = useRef(false);
 
   // api call to retrieve list of toilets here
-
 
   return (
     <MapContainer
@@ -23,8 +23,10 @@ const Map = ({ map, position }) => {
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
       />
-      <SetViewOnClick animateRef={animateRef} />
+      <SearchControl />
+      {/* <SetViewOnClick animateRef={animateRef} /> */}
       <CurrentLocationMarker position={position} />
+      <AddToiletMarker setPosition={setAddToiletPosition} position={addToiletPosition} isActive={isAddingToilet} />
       {/* list of nearby toilet markers here */}
     </MapContainer>
   ); 
