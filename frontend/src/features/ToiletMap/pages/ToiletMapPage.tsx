@@ -6,6 +6,7 @@ import Fab from "@mui/material/Fab";
 import { NAVBAR_HEIGHT_REM } from "../../../common/constants/Dimensions";
 import Stack from "@mui/material/Stack";
 import { AddToiletDrawer } from "../components/AddToilet";
+import Alert from "@mui/material/Alert";
 
 const ToiletMapPage = () => {
   const [map, setMap] = useState(null);
@@ -40,7 +41,12 @@ const ToiletMapPage = () => {
   }
 
   return (
-    <Container disableGutters maxWidth={false} sx={{ bgcolor: 'pink', height: '100%' }}>
+    <Container disableGutters maxWidth={false} sx={{ height: '100%' }}>
+      {(isAddingToilet && !addToiletPosition) &&
+        <Alert severity="info" sx>
+          Click on the map to select a location.
+        </Alert>
+      }
       <Map
         position={position}
         map={setMap}
@@ -66,10 +72,11 @@ const ToiletMapPage = () => {
           </Fab>
         }
       </Stack>
-      {isAddingToilet &&
+      {(isAddingToilet && addToiletPosition) &&
         <AddToiletDrawer
           open={drawerOpen}
           setOpen={setDrawerOpen}
+          addToiletPosition={addToiletPosition}
           setAddToiletPosition={setAddToiletPosition}
           setIsAddingToilet={setIsAddingToilet}
         />

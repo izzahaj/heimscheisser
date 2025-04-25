@@ -1,11 +1,11 @@
 import { Global } from "@emotion/react";
 import { Close } from "@mui/icons-material";
-import { CssBaseline, IconButton, Skeleton, Stack, Typography } from "@mui/material";
+import { CssBaseline, IconButton, Stack, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import SwipeableDrawer from "@mui/material/SwipeableDrawer";
 import AddToiletForm from "./AddToiletForm";
 
-const DRAWER_BLEEDING = 56;
+const DRAWER_BLEEDING = 50;
 
 const Root = styled('div')(({ theme }) => ({
   height: '100%',
@@ -35,7 +35,7 @@ const Puller = styled('div')(({ theme }) => ({
   }),
 }));
 
-const AddToiletDrawer = ({ open, setOpen, setIsAddingToilet, setAddToiletPosition }) => {
+const AddToiletDrawer = ({ open, setOpen, setIsAddingToilet, addToiletPosition, setAddToiletPosition }) => {
   const handleExit = () => {
     setOpen(false);
     setAddToiletPosition(null);
@@ -93,7 +93,7 @@ const AddToiletDrawer = ({ open, setOpen, setIsAddingToilet, setAddToiletPositio
           </Stack>
         </StyledBox>
         <StyledBox sx={{ px: 2, pb: 2, height: '100%', overflow: 'auto' }}>
-          <AddToiletForm />
+          <AddToiletForm handleExit={handleExit} addToiletPosition={addToiletPosition} />
         </StyledBox>
       </SwipeableDrawer>
     </Root>
