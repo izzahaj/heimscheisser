@@ -1,0 +1,15 @@
+{
+  "devDependencies": {
+    "@commitlint/cli": "^19.8.1",
+    "@commitlint/config-conventional": "^19.8.1",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.1.0"
+  },
+  "scripts": {
+    "prepare": "husky",
+    "lint:frontend": "cd frontend && npx eslint --fix && npx prettier --write ."
+  },
+  "lint-staged": {
+    "frontend/**/*.{js,jsx,ts,tsx}": "npm run lint:frontend"
+  }
+}
