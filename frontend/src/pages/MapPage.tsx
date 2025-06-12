@@ -1,3 +1,4 @@
+import { yupResolver } from "@hookform/resolvers/yup";
 import { LatLng, Map as LeafletMap } from "leaflet";
 import {
   Loader2Icon,
@@ -8,8 +9,14 @@ import {
   MapPinX,
   Search,
 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
 
+import FormProvider, {
+  RHFCheckbox,
+  RHFInput,
+  RHFTextarea,
+} from "@/common/components/hook-form";
 import useMediaQuery from "@/common/hooks/useMediaQuery";
 import { Button } from "@/components/ui/button";
 import {
@@ -17,7 +24,6 @@ import {
   DialogClose,
   DialogContent,
   DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
@@ -35,6 +41,11 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import {
+  TOILET_DESC_MAX_LEN,
+  TOILET_NAME_MAX_LEN,
+} from "@/features/ToiletMap/constants/ToiletValues";
+import { toiletSchema } from "@/features/ToiletMap/schema/ToiletSchema";
 
 import { Map } from "../features/ToiletMap/components/Map";
 
@@ -110,6 +121,38 @@ const MapPage = () => {
       setAddToiletPosition(addToiletPosition);
       setOpenForm(true);
     }
+  };
+
+  const defaultValues = {
+    name: "",
+    // latitude: null,
+    // longitude: null,
+    description: "",
+    // genderTypes: [],
+    hasHandicap: false,
+    // bidetTypes: [],
+    isPaid: false,
+    // updatedBy: ""
+  };
+
+  const methods = useForm({
+    resolver: yupResolver(toiletSchema),
+    defaultValues,
+  });
+
+  const {
+    handleSubmit,
+    watch,
+    getFieldState,
+    formState: { isSubmitting, errors },
+  } = methods;
+
+  const onSubmit = handleSubmit(async (data) => {
+    console.log(data);
+  });
+
+  const handleTest = () => {
+    console.log(errors);
   };
 
   return (
@@ -205,24 +248,49 @@ const MapPage = () => {
             <DialogHeader>
               <DialogTitle>Add Toilet</DialogTitle>
               <DialogDescription>
-                This action cannot be undone.
+                Know a loo we don't? Add it to the map!
               </DialogDescription>
             </DialogHeader>
-            <div className="grid m-4">
-              <DialogClose asChild>
-                <Button onClick={handleSelectLocation}>
-                  Edit Map Location
-                </Button>
-              </DialogClose>
-            </div>
-            <DialogFooter>
-              <Button>Submit</Button>
-              <DialogClose asChild>
-                <Button variant="outline" onClick={handleCancelToilet}>
-                  Cancel
-                </Button>
-              </DialogClose>
-            </DialogFooter>
+            <FormProvider methods={methods} onSubmit={onSubmit}>
+              <div className="grid m-4">
+                <RHFInput
+                  type="text"
+                  name="name"
+                  label="Name"
+                  placeholder="Name"
+                  maxLength={TOILET_NAME_MAX_LEN}
+                  required
+                />
+                <RHFTextarea
+                  name="description"
+                  label="Description"
+                  placeholder="Description"
+                  className="field-sizing-fixed"
+                  maxLength={TOILET_DESC_MAX_LEN}
+                  rows={4}
+                  required
+                />
+                <RHFCheckbox
+                  name="hasHandicap"
+                  label="Has accessible toilet"
+                  required
+                />
+                <RHFCheckbox name="isPaid" label="Requires payment" required />
+                <DialogClose asChild>
+                  <Button onClick={handleSelectLocation}>
+                    Edit Map Location
+                  </Button>
+                </DialogClose>
+              </div>
+              <div className="flex flex-row justify-end gap-2">
+                <DialogClose asChild>
+                  <Button variant="outline" onClick={handleCancelToilet}>
+                    Cancel
+                  </Button>
+                </DialogClose>
+                <Button type="submit">Submit</Button>
+              </div>
+            </FormProvider>
           </DialogContent>
         </Dialog>
       ) : (
@@ -242,7 +310,7 @@ const MapPage = () => {
               </DrawerClose>
             </div>
             <DrawerFooter>
-              <Button>Submit</Button>
+              <Button type="submit">Submit</Button>
               <DrawerClose asChild>
                 <Button variant="outline" onClick={handleCancelToilet}>
                   Cancel

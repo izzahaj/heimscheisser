@@ -1,15 +1,17 @@
-import { FormProvider as Form, UseFormReturn } from "react-hook-form";
+import { UseFormReturn } from "react-hook-form";
+
+import { Form } from "@/components/ui/form";
 
 // -------------------------------------------------------------------------------------------------
 
-type Props = {
+type FormProviderProps = {
   children: React.ReactNode;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   methods: UseFormReturn<any>;
   onSubmit?: VoidFunction;
 };
 
-const FormProvider = ({ children, onSubmit, methods }: Props) => {
+const FormProvider = ({ children, onSubmit, methods }: FormProviderProps) => {
   return (
     <Form {...methods}>
       <form noValidate onSubmit={onSubmit}>
