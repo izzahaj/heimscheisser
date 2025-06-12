@@ -9,7 +9,7 @@ import {
   MapPinX,
   Search,
 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 
 import FormProvider, {
@@ -142,18 +142,12 @@ const MapPage = () => {
 
   const {
     handleSubmit,
-    watch,
-    getFieldState,
-    formState: { isSubmitting, errors },
+    formState: { isSubmitting },
   } = methods;
 
   const onSubmit = handleSubmit(async (data) => {
     console.log(data);
   });
-
-  const handleTest = () => {
-    console.log(errors);
-  };
 
   return (
     <>
