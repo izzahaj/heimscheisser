@@ -1,7 +1,6 @@
 import { yupResolver } from "@hookform/resolvers/yup";
 import { LatLng, Map as LeafletMap } from "leaflet";
 import {
-  Loader,
   Loader2Icon,
   Locate,
   LocateFixed,
@@ -13,17 +12,10 @@ import {
 import { useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 
-import FormProvider, {
-  RHFCheckbox,
-  RHFInput,
-  RHFMultiSelect,
-  RHFTextarea,
-} from "@/common/components/hook-form";
 import useMediaQuery from "@/common/hooks/useMediaQuery";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
-  DialogClose,
   DialogContent,
   DialogDescription,
   DialogHeader,
@@ -31,7 +23,6 @@ import {
 } from "@/components/ui/dialog";
 import {
   Drawer,
-  DrawerClose,
   DrawerContent,
   DrawerDescription,
   DrawerHeader,
@@ -42,12 +33,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import {
-  bidetTypeOptions,
-  genderOptions,
-  TOILET_DESC_MAX_LEN,
-  TOILET_NAME_MAX_LEN,
-} from "@/features/ToiletMap/constants/ToiletValues";
+import { AddToiletForm } from "@/features/ToiletMap/components/AddToilet";
 import { toiletSchema } from "@/features/ToiletMap/schema/ToiletSchema";
 import { cn } from "@/lib/utils";
 
@@ -83,21 +69,7 @@ const MapPage = () => {
     defaultValues,
   });
 
-  const {
-    watch,
-    setValue,
-    handleSubmit,
-    reset,
-    formState: { isSubmitting, errors },
-  } = methods;
-
-  const onSubmit = handleSubmit(async (data) => {
-    console.log(data);
-  });
-
-  const handleTest = () => {
-    console.log(errors);
-  };
+  const { watch, setValue, reset } = methods;
 
   const handleFindMyLocation = () => {
     if (map) {
@@ -264,74 +236,11 @@ const MapPage = () => {
                 Know a loo we don't? Add it to the map!
               </DialogDescription>
             </DialogHeader>
-            <FormProvider
+            <AddToiletForm
               methods={methods}
-              onSubmit={onSubmit}
-              className="flex flex-col flex-1 overflow-hidden"
-            >
-              <div className="flex flex-col m-1 px-4 py-1 overflow-auto gap-5">
-                <RHFInput
-                  type="text"
-                  name="name"
-                  label="Name"
-                  placeholder="Name"
-                  maxLength={TOILET_NAME_MAX_LEN}
-                  required
-                />
-                <RHFTextarea
-                  name="description"
-                  label="Description"
-                  placeholder="Description"
-                  className="field-sizing-fixed"
-                  maxLength={TOILET_DESC_MAX_LEN}
-                  rows={4}
-                  helperText="Provide more specifics e.g. floor number, next to a landmark, etc."
-                />
-                <DialogClose asChild>
-                  <Button onClick={handleSelectLocation}>
-                    Edit Map Location
-                  </Button>
-                </DialogClose>
-                <RHFMultiSelect
-                  name="genders"
-                  label="Genders"
-                  options={genderOptions}
-                  placeholder="Select genders"
-                  variant="inverted"
-                  required
-                />
-                <RHFCheckbox
-                  name="hasHandicap"
-                  label="Has accessible toilet"
-                  required
-                />
-                <RHFCheckbox name="isPaid" label="Requires payment" required />
-                <RHFCheckbox name="hasBidet" label="Has bidet" required />
-                {watch("hasBidet") && (
-                  <RHFMultiSelect
-                    name="bidetTypes"
-                    label="Bidet Types"
-                    options={bidetTypeOptions}
-                    placeholder="Select bidet types"
-                    variant="inverted"
-                  />
-                )}
-              </div>
-              <div className="flex flex-row justify-end gap-2 p-1">
-                <DialogClose asChild>
-                  <Button variant="outline">Cancel</Button>
-                </DialogClose>
-                <Button
-                  type="submit"
-                  onClick={handleTest}
-                  className="flex flex-row gap-2 items-center"
-                  disabled={isSubmitting}
-                >
-                  {isSubmitting && <Loader className="h-5 w-5 animate-spin" />}
-                  Submit
-                </Button>
-              </div>
-            </FormProvider>
+              handleClose={() => setOpenForm(false)}
+              handleSelectLocation={handleSelectLocation}
+            />
           </DialogContent>
         </Dialog>
       ) : (
@@ -347,74 +256,11 @@ const MapPage = () => {
                 Know a loo we don't? Add it to the map!
               </DrawerDescription>
             </DrawerHeader>
-            <FormProvider
+            <AddToiletForm
               methods={methods}
-              onSubmit={onSubmit}
-              className="flex flex-col flex-1 overflow-hidden"
-            >
-              <div className="flex flex-col m-1 px-4 py-1 overflow-auto gap-5 ">
-                <RHFInput
-                  type="text"
-                  name="name"
-                  label="Name"
-                  placeholder="Name"
-                  maxLength={TOILET_NAME_MAX_LEN}
-                  required
-                />
-                <RHFTextarea
-                  name="description"
-                  label="Description"
-                  placeholder="Description"
-                  className="field-sizing-fixed"
-                  maxLength={TOILET_DESC_MAX_LEN}
-                  rows={4}
-                  helperText="Provide more specifics e.g. floor number, next to a landmark, etc."
-                />
-                <DrawerClose asChild>
-                  <Button onClick={handleSelectLocation}>
-                    Edit Map Location
-                  </Button>
-                </DrawerClose>
-                <RHFMultiSelect
-                  name="genders"
-                  label="Genders"
-                  options={genderOptions}
-                  placeholder="Select genders"
-                  variant="inverted"
-                  required
-                />
-                <RHFCheckbox
-                  name="hasHandicap"
-                  label="Has accessible toilet"
-                  required
-                />
-                <RHFCheckbox name="isPaid" label="Requires payment" required />
-                <RHFCheckbox name="hasBidet" label="Has bidet" required />
-                {watch("hasBidet") && (
-                  <RHFMultiSelect
-                    name="bidetTypes"
-                    label="Bidet Types"
-                    options={bidetTypeOptions}
-                    placeholder="Select bidet types"
-                    variant="inverted"
-                  />
-                )}
-              </div>
-              <div className="flex flex-row justify-around gap-2 p-1">
-                <DrawerClose asChild className="flex-1">
-                  <Button variant="outline">Cancel</Button>
-                </DrawerClose>
-                <Button
-                  type="submit"
-                  onClick={handleTest}
-                  className="flex-1 flex flex-row gap-2 items-center"
-                  disabled={isSubmitting}
-                >
-                  {isSubmitting && <Loader className="h-5 w-5 animate-spin" />}
-                  Submit
-                </Button>
-              </div>
-            </FormProvider>
+              handleClose={() => setOpenForm(false)}
+              handleSelectLocation={handleSelectLocation}
+            />
           </DrawerContent>
         </Drawer>
       )}

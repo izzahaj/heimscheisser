@@ -7,7 +7,7 @@
   },
   "scripts": {
     "prepare": "husky",
-    "lint:frontend": "cd frontend && npx eslint --fix && npx prettier --write ."
+    "lint:frontend": "cd frontend && npx prettier --write . && npx eslint --fix"
   },
   "lint-staged": {
     "frontend/**/*.{js,jsx,ts,tsx}": "npm run lint:frontend"
