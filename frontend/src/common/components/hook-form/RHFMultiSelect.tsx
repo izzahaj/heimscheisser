@@ -7,18 +7,19 @@ import {
   FormItem,
   FormMessage,
 } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
 
 import { BaseFormLabel } from "../form";
+import { MultiSelect, MultiSelectProps } from "../multi-select";
 
-type RHFInputProps = React.ComponentProps<"input"> & {
+type RHFMultiSelectProps = MultiSelectProps & {
   name: string;
   label?: string;
   helperText?: string;
+  required?: boolean;
 };
 
-const RHFInput: React.FC<RHFInputProps> = (props) => {
-  const { name, label, helperText, required, ...others } = props;
+const RHFMultiSelect: React.FC<RHFMultiSelectProps> = (props) => {
+  const { name, label, helperText, required = false, ...others } = props;
   const { control } = useFormContext();
 
   return (
@@ -29,7 +30,12 @@ const RHFInput: React.FC<RHFInputProps> = (props) => {
         <FormItem>
           {label && <BaseFormLabel required={required}>{label}</BaseFormLabel>}
           <FormControl>
-            <Input {...field} {...others} />
+            <MultiSelect
+              {...field}
+              {...others}
+              value={field.value}
+              onValueChange={field.onChange}
+            />
           </FormControl>
           {helperText && <FormDescription>{helperText}</FormDescription>}
           <FormMessage />
@@ -39,4 +45,4 @@ const RHFInput: React.FC<RHFInputProps> = (props) => {
   );
 };
 
-export default RHFInput;
+export default RHFMultiSelect;

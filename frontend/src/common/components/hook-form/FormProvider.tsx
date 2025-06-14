@@ -9,12 +9,18 @@ type FormProviderProps = {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   methods: UseFormReturn<any>;
   onSubmit?: VoidFunction;
+  className?: string;
 };
 
-const FormProvider = ({ children, onSubmit, methods }: FormProviderProps) => {
+const FormProvider = ({
+  children,
+  onSubmit,
+  methods,
+  className,
+}: FormProviderProps) => {
   return (
     <Form {...methods}>
-      <form noValidate onSubmit={onSubmit}>
+      <form noValidate onSubmit={onSubmit} className={className}>
         {children}
       </form>
     </Form>

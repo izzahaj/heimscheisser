@@ -50,9 +50,11 @@ function DialogContent({
   className,
   children,
   showCloseButton = true,
+  onClickClose,
   ...props
 }: React.ComponentProps<typeof DialogPrimitive.Content> & {
   showCloseButton?: boolean;
+  onClickClose?: React.MouseEventHandler<HTMLButtonElement>;
 }) {
   return (
     <DialogPortal data-slot="dialog-portal">
@@ -80,6 +82,7 @@ function DialogContent({
               "focus:outline-hidden disabled:pointer-events-none [&_svg]:pointer-events-none",
               "[&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
             )}
+            onClick={onClickClose}
           >
             <XIcon />
             <span className="sr-only">Close</span>

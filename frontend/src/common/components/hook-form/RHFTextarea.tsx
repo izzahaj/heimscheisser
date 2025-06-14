@@ -5,10 +5,11 @@ import {
   FormDescription,
   FormField,
   FormItem,
-  FormLabel,
   FormMessage,
 } from "@/components/ui/form";
 import { Textarea } from "@/components/ui/textarea";
+
+import { BaseFormLabel } from "../form";
 
 type RHFTextareaProps = React.ComponentProps<"textarea"> & {
   name: string;
@@ -17,7 +18,7 @@ type RHFTextareaProps = React.ComponentProps<"textarea"> & {
 };
 
 const RHFTextarea: React.FC<RHFTextareaProps> = (props) => {
-  const { name, label, helperText, ...others } = props;
+  const { name, label, helperText, required, ...others } = props;
   const { control } = useFormContext();
 
   return (
@@ -26,7 +27,7 @@ const RHFTextarea: React.FC<RHFTextareaProps> = (props) => {
       name={name}
       render={({ field }) => (
         <FormItem>
-          {label && <FormLabel>{label}</FormLabel>}
+          {label && <BaseFormLabel required={required}>{label}</BaseFormLabel>}
           <FormControl>
             <Textarea {...field} {...others} />
           </FormControl>

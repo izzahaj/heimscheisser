@@ -30,6 +30,7 @@ const RHFCheckbox: React.FC<RHFCheckboxProps> = (props) => {
           <div className="flex flex-row gap-2 items-center">
             <FormControl>
               <Checkbox
+                {...field}
                 checked={field.value}
                 onCheckedChange={field.onChange}
                 {...others}

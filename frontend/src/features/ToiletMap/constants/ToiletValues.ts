@@ -2,13 +2,12 @@ export const TOILET_NAME_MAX_LEN = 255;
 export const TOILET_DESC_MAX_LEN = 1250;
 
 export enum BidetType {
-  None = "none",
   HandHeld = "hand-held",
   Attachment = "attachment",
   Standalone = "standalone",
 }
 
-export enum GenderType {
+export enum Gender {
   Male = "male",
   Female = "female",
   GenderNeutral = "gender-neutral",
@@ -27,5 +26,5 @@ const createOptionsFromEnum = <T extends StringEnum>(enumObj: T) => {
   }));
 };
 
-export const genderTypeOptions = createOptionsFromEnum(GenderType);
+export const genderOptions = createOptionsFromEnum(Gender);
 export const bidetTypeOptions = createOptionsFromEnum(BidetType);

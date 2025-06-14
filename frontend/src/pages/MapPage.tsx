@@ -1,6 +1,7 @@
 import { yupResolver } from "@hookform/resolvers/yup";
 import { LatLng, Map as LeafletMap } from "leaflet";
 import {
+  Loader,
   Loader2Icon,
   Locate,
   LocateFixed,
@@ -9,12 +10,13 @@ import {
   MapPinX,
   Search,
 } from "lucide-react";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 
 import FormProvider, {
   RHFCheckbox,
   RHFInput,
+  RHFMultiSelect,
   RHFTextarea,
 } from "@/common/components/hook-form";
 import useMediaQuery from "@/common/hooks/useMediaQuery";
@@ -32,7 +34,6 @@ import {
   DrawerClose,
   DrawerContent,
   DrawerDescription,
-  DrawerFooter,
   DrawerHeader,
   DrawerTitle,
 } from "@/components/ui/drawer";
@@ -42,10 +43,13 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import {
+  bidetTypeOptions,
+  genderOptions,
   TOILET_DESC_MAX_LEN,
   TOILET_NAME_MAX_LEN,
 } from "@/features/ToiletMap/constants/ToiletValues";
 import { toiletSchema } from "@/features/ToiletMap/schema/ToiletSchema";
+import { cn } from "@/lib/utils";
 
 import { Map } from "../features/ToiletMap/components/Map";
 
@@ -53,8 +57,6 @@ const MapPage = () => {
   const [map, setMap] = useState<LeafletMap | null>(null);
   const [myPosition, setMyPosition] = useState<LatLng | null>(null);
   const [isLocating, setIsLocating] = useState(false);
-  const [defaultToiletPosition, setDefaultToiletPosition] =
-    useState<LatLng | null>(null); // the toilet position upon opening form
   const [addToiletPosition, setAddToiletPosition] = useState<LatLng | null>(
     null,
   );
@@ -62,6 +64,40 @@ const MapPage = () => {
     useState(false);
   const [openForm, setOpenForm] = useState(false);
   const isTablet = useMediaQuery("md");
+  const skipResetRef = useRef(false);
+
+  const defaultValues = {
+    name: "",
+    latitude: null,
+    longitude: null,
+    description: "",
+    genders: [],
+    hasHandicap: false,
+    hasBidet: false,
+    bidetTypes: [],
+    isPaid: false,
+  };
+
+  const methods = useForm({
+    resolver: yupResolver(toiletSchema),
+    defaultValues,
+  });
+
+  const {
+    watch,
+    setValue,
+    handleSubmit,
+    reset,
+    formState: { isSubmitting, errors },
+  } = methods;
+
+  const onSubmit = handleSubmit(async (data) => {
+    console.log(data);
+  });
+
+  const handleTest = () => {
+    console.log(errors);
+  };
 
   const handleFindMyLocation = () => {
     if (map) {
@@ -82,72 +118,55 @@ const MapPage = () => {
     }
   };
 
+  const handleOnOpenChange = (isOpen: boolean) => {
+    setOpenForm(isOpen);
+    if (!isOpen && !skipResetRef.current) {
+      reset(); // reset form if closed not via Edit Map Location
+      setAddToiletPosition(null);
+    }
+    skipResetRef.current = false; // reset the flag after close
+  };
+
   const handleAddToilet = () => {
     if (map) {
       const center = map.getCenter();
-      setDefaultToiletPosition(center);
+      setValue("latitude", center.lat);
+      setValue("longitude", center.lng);
       setAddToiletPosition(center);
       setOpenForm(true);
     }
   };
 
-  const handleCancelToilet = () => {
-    setAddToiletPosition(null);
-    setIsSelectingToiletLocation(false);
-  };
-
   const handleSelectLocation = () => {
+    skipResetRef.current = true;
     if (map) {
       setIsSelectingToiletLocation(true);
-      setAddToiletPosition(defaultToiletPosition);
-      map.flyTo(defaultToiletPosition!, map.getZoom());
+      const position = new LatLng(watch("latitude")!, watch("longitude")!);
+      setAddToiletPosition(position);
+      map.flyTo(position, map.getZoom());
     }
   };
 
   const handleCancelToiletPin = () => {
     if (map) {
-      setIsSelectingToiletLocation(false);
-      map.flyTo(defaultToiletPosition!, map.getZoom());
-      setAddToiletPosition(defaultToiletPosition);
+      const position = new LatLng(watch("latitude")!, watch("longitude")!);
+      map.flyTo(position, map.getZoom());
+      setAddToiletPosition(position);
       setOpenForm(true);
+      setIsSelectingToiletLocation(false);
     }
   };
 
   const handleSaveToiletPin = () => {
     if (map) {
-      setIsSelectingToiletLocation(false);
       map.flyTo(addToiletPosition!, map.getZoom());
-      setDefaultToiletPosition(addToiletPosition);
+      setValue("latitude", addToiletPosition!.lat);
+      setValue("longitude", addToiletPosition!.lng);
       setAddToiletPosition(addToiletPosition);
       setOpenForm(true);
+      setIsSelectingToiletLocation(false);
     }
   };
-
-  const defaultValues = {
-    name: "",
-    // latitude: null,
-    // longitude: null,
-    description: "",
-    // genderTypes: [],
-    hasHandicap: false,
-    // bidetTypes: [],
-    isPaid: false,
-    // updatedBy: ""
-  };
-
-  const methods = useForm({
-    resolver: yupResolver(toiletSchema),
-    defaultValues,
-  });
-
-  const {
-    handleSubmit,
-    formState: { isSubmitting },
-  } = methods;
-
-  const onSubmit = handleSubmit(async (data) => {
-    console.log(data);
-  });
 
   return (
     <>
@@ -237,16 +256,20 @@ const MapPage = () => {
         </Tooltip>
       </div>
       {isTablet ? (
-        <Dialog open={openForm} onOpenChange={setOpenForm}>
-          <DialogContent>
+        <Dialog open={openForm} onOpenChange={handleOnOpenChange}>
+          <DialogContent className="max-h-[90vh] overflow-hidden flex flex-col">
             <DialogHeader>
               <DialogTitle>Add Toilet</DialogTitle>
               <DialogDescription>
                 Know a loo we don't? Add it to the map!
               </DialogDescription>
             </DialogHeader>
-            <FormProvider methods={methods} onSubmit={onSubmit}>
-              <div className="grid m-4">
+            <FormProvider
+              methods={methods}
+              onSubmit={onSubmit}
+              className="flex flex-col flex-1 overflow-hidden"
+            >
+              <div className="flex flex-col m-1 px-4 py-1 overflow-auto gap-5">
                 <RHFInput
                   type="text"
                   name="name"
@@ -262,6 +285,19 @@ const MapPage = () => {
                   className="field-sizing-fixed"
                   maxLength={TOILET_DESC_MAX_LEN}
                   rows={4}
+                  helperText="Provide more specifics e.g. floor number, next to a landmark, etc."
+                />
+                <DialogClose asChild>
+                  <Button onClick={handleSelectLocation}>
+                    Edit Map Location
+                  </Button>
+                </DialogClose>
+                <RHFMultiSelect
+                  name="genders"
+                  label="Genders"
+                  options={genderOptions}
+                  placeholder="Select genders"
+                  variant="inverted"
                   required
                 />
                 <RHFCheckbox
@@ -270,47 +306,115 @@ const MapPage = () => {
                   required
                 />
                 <RHFCheckbox name="isPaid" label="Requires payment" required />
-                <DialogClose asChild>
-                  <Button onClick={handleSelectLocation}>
-                    Edit Map Location
-                  </Button>
-                </DialogClose>
+                <RHFCheckbox name="hasBidet" label="Has bidet" required />
+                {watch("hasBidet") && (
+                  <RHFMultiSelect
+                    name="bidetTypes"
+                    label="Bidet Types"
+                    options={bidetTypeOptions}
+                    placeholder="Select bidet types"
+                    variant="inverted"
+                  />
+                )}
               </div>
-              <div className="flex flex-row justify-end gap-2">
+              <div className="flex flex-row justify-end gap-2 p-1">
                 <DialogClose asChild>
-                  <Button variant="outline" onClick={handleCancelToilet}>
-                    Cancel
-                  </Button>
+                  <Button variant="outline">Cancel</Button>
                 </DialogClose>
-                <Button type="submit">Submit</Button>
+                <Button
+                  type="submit"
+                  onClick={handleTest}
+                  className="flex flex-row gap-2 items-center"
+                  disabled={isSubmitting}
+                >
+                  {isSubmitting && <Loader className="h-5 w-5 animate-spin" />}
+                  Submit
+                </Button>
               </div>
             </FormProvider>
           </DialogContent>
         </Dialog>
       ) : (
-        <Drawer open={openForm} onOpenChange={setOpenForm}>
-          <DrawerContent>
+        <Drawer open={openForm} onOpenChange={handleOnOpenChange}>
+          <DrawerContent
+            className={cn(
+              "overflow-hidden flex flex-col p-1 data-[vaul-drawer-direction=bottom]:max-h-[100vh]",
+            )}
+          >
             <DrawerHeader>
               <DrawerTitle>Add Toilet</DrawerTitle>
               <DrawerDescription>
-                This action cannot be undone.
+                Know a loo we don't? Add it to the map!
               </DrawerDescription>
             </DrawerHeader>
-            <div className="grid m-4">
-              <DrawerClose asChild>
-                <Button onClick={handleSelectLocation}>
-                  Edit Map Location
+            <FormProvider
+              methods={methods}
+              onSubmit={onSubmit}
+              className="flex flex-col flex-1 overflow-hidden"
+            >
+              <div className="flex flex-col m-1 px-4 py-1 overflow-auto gap-5 ">
+                <RHFInput
+                  type="text"
+                  name="name"
+                  label="Name"
+                  placeholder="Name"
+                  maxLength={TOILET_NAME_MAX_LEN}
+                  required
+                />
+                <RHFTextarea
+                  name="description"
+                  label="Description"
+                  placeholder="Description"
+                  className="field-sizing-fixed"
+                  maxLength={TOILET_DESC_MAX_LEN}
+                  rows={4}
+                  helperText="Provide more specifics e.g. floor number, next to a landmark, etc."
+                />
+                <DrawerClose asChild>
+                  <Button onClick={handleSelectLocation}>
+                    Edit Map Location
+                  </Button>
+                </DrawerClose>
+                <RHFMultiSelect
+                  name="genders"
+                  label="Genders"
+                  options={genderOptions}
+                  placeholder="Select genders"
+                  variant="inverted"
+                  required
+                />
+                <RHFCheckbox
+                  name="hasHandicap"
+                  label="Has accessible toilet"
+                  required
+                />
+                <RHFCheckbox name="isPaid" label="Requires payment" required />
+                <RHFCheckbox name="hasBidet" label="Has bidet" required />
+                {watch("hasBidet") && (
+                  <RHFMultiSelect
+                    name="bidetTypes"
+                    label="Bidet Types"
+                    options={bidetTypeOptions}
+                    placeholder="Select bidet types"
+                    variant="inverted"
+                  />
+                )}
+              </div>
+              <div className="flex flex-row justify-around gap-2 p-1">
+                <DrawerClose asChild className="flex-1">
+                  <Button variant="outline">Cancel</Button>
+                </DrawerClose>
+                <Button
+                  type="submit"
+                  onClick={handleTest}
+                  className="flex-1 flex flex-row gap-2 items-center"
+                  disabled={isSubmitting}
+                >
+                  {isSubmitting && <Loader className="h-5 w-5 animate-spin" />}
+                  Submit
                 </Button>
-              </DrawerClose>
-            </div>
-            <DrawerFooter>
-              <Button type="submit">Submit</Button>
-              <DrawerClose asChild>
-                <Button variant="outline" onClick={handleCancelToilet}>
-                  Cancel
-                </Button>
-              </DrawerClose>
-            </DrawerFooter>
+              </div>
+            </FormProvider>
           </DrawerContent>
         </Drawer>
       )}
