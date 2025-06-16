@@ -2,11 +2,17 @@ version: '3.9'
 
 services:
   toilet-service:
-    build: .
+    build:
+      context: .
+      target: dev
     depends_on:
-      - postgres-db
+      postgres-db:
+        condition: service_healthy
+    restart: on-failure:3
     ports:
-      - "5000:5000"
+      - ${PORT}:${PORT}
+    image: izzahaj/heimscheisser/toilet-service:latest
+    container_name: toilet-service
     environment:
       DB_URL: ${DB_URL}
       ENV: development
@@ -15,16 +21,38 @@ services:
       - .env
 
   postgres-db:
-    image: postgres:15.4
+    image: kartoza/postgis:17-3.5
+    container_name: postgres-db
     restart: always
     environment:
-      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_DBNAME: ${DB_NAME}
       POSTGRES_USER: ${DB_USER}
-      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_PASS: ${DB_PASSWORD}
+      PGUSER: ${DB_USER}
+    healthcheck:
+      test: [ "CMD", "pg_isready", "-U", "${DB_USER}" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
     ports:
       - ${DB_PORT}:${DB_PORT}
     volumes:
       - postgres-db:/var/lib/postgresql/data
+    env_file:
+      - .env
+
+  migration:
+    image: ghcr.io/kukymbr/goose-docker:latest
+    container_name: migration
+    restart: on-failure:3
+    depends_on:
+      postgres-db:
+        condition: service_healthy
+    environment:
+      DB_URL: ${DB_URL}
+    volumes:
+      - ./migrations:/migrations
+    entrypoint: [ "goose", "-dir", "/migrations", "postgres", "${DB_URL}", "up" ]
     env_file:
       - .env
 

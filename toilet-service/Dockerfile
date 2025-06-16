@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1.4
 
 # Stage 1: Base builder image
-ARG GO_VERSION=1.24
+ARG GO_VERSION=1.24.2
 FROM golang:${GO_VERSION}-bookworm AS base
 WORKDIR /app
 
@@ -26,7 +26,7 @@ FROM debian:bookworm-slim as dev
 
 WORKDIR /app
 
-ENV NODE_ENV=development
+ENV ENV=development
 
 COPY --from=build /app/main .
 
@@ -39,7 +39,7 @@ FROM debian:bookworm-slim AS prod
 
 WORKDIR /app
 
-ENV NODE_ENV=production
+ENV ENV=production
 
 # Create a non-root user and group
 RUN groupadd -r appuser && useradd -r -g appuser appuser
