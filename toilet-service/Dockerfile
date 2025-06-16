@@ -21,25 +21,10 @@ COPY . .
 RUN --mount=type=cache,target=/go/pkg/mod/ \
     CGO_ENABLED=0 go build -ldflags="-w -s" -o main .
 
-# Stage 4: Dev runtime image
-FROM debian:bookworm-slim as dev
+# Stage 4: Final runtime image
+FROM debian:bookworm-slim AS final
 
 WORKDIR /app
-
-ENV ENV=development
-
-COPY --from=build /app/main .
-
-EXPOSE 5000
-
-CMD [ "./main" ]
-
-# Stage 5: Prod runtime image
-FROM debian:bookworm-slim AS prod
-
-WORKDIR /app
-
-ENV ENV=production
 
 # Create a non-root user and group
 RUN groupadd -r appuser && useradd -r -g appuser appuser
@@ -52,4 +37,4 @@ USER appuser
 
 EXPOSE 5000
 
-CMD ["./main"]
+CMD ["/app/main"]

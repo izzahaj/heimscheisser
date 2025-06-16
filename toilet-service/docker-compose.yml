@@ -4,19 +4,17 @@ services:
   toilet-service:
     build:
       context: .
-      target: dev
+      target: final
     depends_on:
       postgres-db:
         condition: service_healthy
-    restart: on-failure:3
+    restart: on-failure:5
     ports:
       - ${PORT}:${PORT}
     image: izzahaj/heimscheisser/toilet-service:latest
     container_name: toilet-service
     environment:
       DB_URL: ${DB_URL}
-      ENV: development
-    command: ./main
     env_file:
       - .env
 
@@ -44,7 +42,7 @@ services:
   migration:
     image: ghcr.io/kukymbr/goose-docker:latest
     container_name: migration
-    restart: on-failure:3
+    restart: on-failure:5
     depends_on:
       postgres-db:
         condition: service_healthy

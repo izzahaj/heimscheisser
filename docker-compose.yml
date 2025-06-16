@@ -1,0 +1,12 @@
+version: '3.9'
+
+services:
+  frontend:
+    image: izzahaj/heimscheisser/frontend:latest
+    container_name: frontend
+    build:
+      context: ./frontend
+      target: final
+    ports:
+      - 3000:80
+  
