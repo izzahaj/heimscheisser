@@ -59,28 +59,35 @@ func (h *Handler) CreateToilet(w http.ResponseWriter, r *http.Request) {
 func (h *Handler) GetNearbyToilets(w http.ResponseWriter, r *http.Request) {
 	query := r.URL.Query()
 
-	lat, errLat := strconv.ParseFloat(query.Get("lat"), 64)
-	lng, errLng := strconv.ParseFloat(query.Get("lng"), 64)
-	radius, errRadius := strconv.ParseFloat(query.Get("radius"), 64)
-
-	if errLat != nil {
-		response.JsonErrorResponse(w, fmt.Errorf("invalid format for 'lat': must be a float"), http.StatusBadRequest)
-	}
-
-	if errLng != nil {
-		response.JsonErrorResponse(w, fmt.Errorf("invalid format for 'lng': must be a float"), http.StatusBadRequest)
+	minLat, errMinLat := strconv.ParseFloat(query.Get("minLat"), 64)
+	if errMinLat != nil {
+		response.JsonErrorResponse(w, fmt.Errorf("invalid format for 'minLat': must be a float"), http.StatusBadRequest)
 		return
 	}
 
-	if errRadius != nil {
-		response.JsonErrorResponse(w, fmt.Errorf("invalid format for 'radius': must be a float"), http.StatusBadRequest)
+	minLng, errMinLng := strconv.ParseFloat(query.Get("minLng"), 64)
+	if errMinLng != nil {
+		response.JsonErrorResponse(w, fmt.Errorf("invalid format for 'minLng': must be a float"), http.StatusBadRequest)
+		return
+	}
+
+	maxLat, errMaxLat := strconv.ParseFloat(query.Get("maxLat"), 64)
+	if errMaxLat != nil {
+		response.JsonErrorResponse(w, fmt.Errorf("invalid format for 'maxLat': must be a float"), http.StatusBadRequest)
+		return
+	}
+
+	maxLng, errMaxLng := strconv.ParseFloat(query.Get("maxLng"), 64)
+	if errMaxLng != nil {
+		response.JsonErrorResponse(w, fmt.Errorf("invalid format for 'maxLng': must be a float"), http.StatusBadRequest)
 		return
 	}
 
 	queryDTO := dto.NearbyToiletQuery{
-		Latitude:  lat,
-		Longitude: lng,
-		Radius:    radius,
+		MinLatitude:  minLat,
+		MinLongitude: minLng,
+		MaxLatitude:  maxLat,
+		MaxLongitude: maxLng,
 	}
 
 	toilets, err := h.service.GetNearbyToilets(r.Context(), queryDTO)

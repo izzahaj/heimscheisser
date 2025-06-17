@@ -57,7 +57,7 @@ func (s *ToiletService) GetNearbyToilets(ctx context.Context, dto dto.NearbyToil
 		return nil, err
 	}
 
-	toilets, err := s.repo.GetNearby(ctx, dto.Latitude, dto.Longitude, dto.Radius)
+	toilets, err := s.repo.GetNearby(ctx, dto.MinLatitude, dto.MinLongitude, dto.MaxLatitude, dto.MaxLongitude)
 	if err != nil {
 		return nil, err
 	}

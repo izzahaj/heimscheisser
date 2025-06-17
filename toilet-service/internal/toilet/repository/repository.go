@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+
 	"github.com/google/uuid"
 	"github.com/izzahaj/heimscheisser/toilet-service/internal/toilet/model"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -9,7 +10,7 @@ import (
 
 type Repository interface {
 	Create(ctx context.Context, toilet *model.Toilet) error
-	GetNearby(ctx context.Context, lat, lng, radius float64) ([]model.Toilet, error)
+	GetNearby(ctx context.Context, minLat, minLng, maxLat, maxLng float64) ([]model.Toilet, error)
 	GetByID(ctx context.Context, id uuid.UUID) (*model.Toilet, error)
 	UpdateByID(ctx context.Context, id uuid.UUID, toilet *model.Toilet) error
 	DeleteByID(ctx context.Context, id uuid.UUID) error
@@ -48,25 +49,21 @@ func (r *ToiletRepository) Create(ctx context.Context, toilet *model.Toilet) err
 		toilet.IsPaid,
 		toilet.BidetTypes,
 	).Scan(
-		toilet.ID,
-		toilet.CreatedAt,
-		toilet.UpdatedAt,
+		&toilet.ID,
+		&toilet.CreatedAt,
+		&toilet.UpdatedAt,
 	)
 }
 
-func (r *ToiletRepository) GetNearby(ctx context.Context, lat, lng, radius float64) ([]model.Toilet, error) {
+func (r *ToiletRepository) GetNearby(ctx context.Context, minLat, minLng, maxLat, maxLng float64) ([]model.Toilet, error) {
 	query := `
 		SELECT id, name, description, ST_Y(location::geometry) AS latitude, ST_X(location::geometry) AS longitude,
 		       genders, has_handicap, has_bidet, is_paid, bidet_types, created_at, updated_at
 		FROM toilets
-		WHERE ST_DWithin(
-			location::geography,
-			ST_SetSRID(ST_MakePoint($2, $1), 4326)::geography,
-			$3
-		)
+		WHERE location && ST_MakeEnvelope($2, $1, $4, $3, 4326)
 	`
 
-	rows, err := r.db.Query(ctx, query, lat, lng, radius)
+	rows, err := r.db.Query(ctx, query, minLat, minLng, maxLat, maxLng)
 
 	if err != nil {
 		return nil, err
@@ -159,7 +156,7 @@ func (r *ToiletRepository) UpdateByID(ctx context.Context, id uuid.UUID, toilet 
 		toilet.BidetTypes,
 		id,
 	).Scan(
-		toilet.UpdatedAt,
+		&toilet.UpdatedAt,
 	)
 }
 
