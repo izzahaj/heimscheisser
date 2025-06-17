@@ -1,3 +1,4 @@
+import axios from "axios";
 import { Loader } from "lucide-react";
 import { UseFormReturn } from "react-hook-form";
 
@@ -9,6 +10,7 @@ import FormProvider, {
 } from "@/common/components/hook-form";
 import { Button } from "@/components/ui/button";
 import { DialogClose } from "@/components/ui/dialog";
+import { TOILET_SVC_URI } from "@/config/uris";
 
 import {
   BidetType,
@@ -55,18 +57,32 @@ const AddToiletForm: React.FC<AddToiletFormProps> = (props) => {
   const {
     watch,
     handleSubmit,
-    reset,
     formState: { isSubmitting },
   } = methods;
 
   const onSubmit = handleSubmit(async (data) => {
-    handleClose();
-
+    console.log(data);
     if (!data.hasBidet) {
       data.bidetTypes = [];
     }
-    reset();
-    console.log(data);
+
+    const url = TOILET_SVC_URI;
+    const config = {
+      headers: {
+        "Content-Type": "application/json",
+      },
+    };
+
+    try {
+      const response = await axios.post(url, data, config);
+      // TODO: Add new toilet marker
+      // TODO: Add success toast
+      console.log(response);
+      handleClose();
+    } catch (err) {
+      console.log(err);
+      // TODO: handle error with alert
+    }
   });
 
   return (

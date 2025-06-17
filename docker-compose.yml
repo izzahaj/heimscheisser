@@ -35,16 +35,15 @@ services:
       - .env
 
   postgres-db:
-    image: kartoza/postgis:17-3.5
+    image: imresamu/postgis:17-3.5-alpine3.22
     container_name: postgres-db
     restart: always
     environment:
-      POSTGRES_DBNAME: ${DB_NAME}
+      POSTGRES_DB: ${DB_NAME}
       POSTGRES_USER: ${DB_USER}
-      POSTGRES_PASS: ${DB_PASSWORD}
-      PGUSER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
     healthcheck:
-      test: [ "CMD", "pg_isready", "-U", "${DB_USER}" ]
+      test: [ "CMD", "pg_isready", "-U", "${DB_USER}", "-d", "${DB_NAME}" ]
       interval: 10s
       timeout: 5s
       retries: 5

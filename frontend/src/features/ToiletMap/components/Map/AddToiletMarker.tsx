@@ -1,4 +1,5 @@
-import { LatLng } from "leaflet";
+import L, { LatLng, LeafletEventHandlerFnMap } from "leaflet";
+import { useMemo, useRef } from "react";
 import { Marker, useMapEvents } from "react-leaflet";
 
 type AddToiletMarkerProps = {
@@ -9,6 +10,7 @@ type AddToiletMarkerProps = {
 
 const AddToiletMarker: React.FC<AddToiletMarkerProps> = (props) => {
   const { setPosition, position, isActive } = props;
+  const markerRef = useRef<L.Marker>(null);
 
   useMapEvents({
     click(e) {
@@ -18,9 +20,29 @@ const AddToiletMarker: React.FC<AddToiletMarkerProps> = (props) => {
     },
   });
 
-  return position === null
-    ? null
-    : isActive && <Marker position={position} draggable={true} />;
+  const eventHandlers: LeafletEventHandlerFnMap = useMemo(
+    () => ({
+      dragend() {
+        const marker = markerRef.current;
+        if (marker != null) {
+          setPosition(marker.getLatLng());
+        }
+      },
+    }),
+    [setPosition],
+  );
+
+  return (
+    position !== null &&
+    isActive && (
+      <Marker
+        position={position}
+        draggable={true}
+        eventHandlers={eventHandlers}
+        ref={markerRef}
+      />
+    )
+  );
 };
 
 export default AddToiletMarker;

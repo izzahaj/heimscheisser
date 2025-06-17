@@ -144,6 +144,7 @@ const MapPage = () => {
     <>
       <Map
         setMap={setMap}
+        map={map}
         myPosition={myPosition}
         setAddToiletPosition={setAddToiletPosition}
         addToiletPosition={addToiletPosition}

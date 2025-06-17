@@ -84,10 +84,10 @@ func (h *Handler) GetNearbyToilets(w http.ResponseWriter, r *http.Request) {
 	}
 
 	queryDTO := dto.NearbyToiletQuery{
-		MinLatitude:  minLat,
-		MinLongitude: minLng,
-		MaxLatitude:  maxLat,
-		MaxLongitude: maxLng,
+		MinLat: minLat,
+		MinLng: minLng,
+		MaxLat: maxLat,
+		MaxLng: maxLng,
 	}
 
 	toilets, err := h.service.GetNearbyToilets(r.Context(), queryDTO)

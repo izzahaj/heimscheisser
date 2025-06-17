@@ -25,8 +25,8 @@ type UpdateToiletDTO struct {
 }
 
 type NearbyToiletQuery struct {
-	MinLatitude  float64 `json:"minLatitude" validate:"required,latitude"`
-	MinLongitude float64 `json:"minLongitude" validate:"required,longitude"`
-	MaxLatitude  float64 `json:"maxLatitude" validate:"required,latitude"`
-	MaxLongitude float64 `json:"maxLongitude" validate:"required,longitude"`
+	MinLat float64 `json:"minLat" validate:"required,latitude"`
+	MinLng float64 `json:"minLng" validate:"required,longitude"`
+	MaxLat float64 `json:"maxLat" validate:"required,latitude"`
+	MaxLng float64 `json:"maxLng" validate:"required,longitude"`
 }
