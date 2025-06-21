@@ -5,33 +5,59 @@ import { useMemo, useRef, useState } from "react";
 import ReactDOMServer from "react-dom/server";
 import { Marker } from "react-leaflet";
 
+import { Toilet } from "../../types/Toilet.types";
+
 type ToiletMarkerProps = {
   position: LatLngExpression | null;
+  setSelectedToilet: React.Dispatch<React.SetStateAction<Toilet | null>>;
+  toilet: Toilet;
+  selectedToilet: Toilet | null;
+  setOpenDetails: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
 const ToiletMarker: React.FC<ToiletMarkerProps> = (props) => {
-  const { position } = props;
-  const [opacity, setOpacity] = useState(70);
+  const {
+    position,
+    toilet,
+    selectedToilet,
+    setSelectedToilet,
+    setOpenDetails,
+  } = props;
+  const [opacity, setOpacity] = useState(0.7);
   const markerRef = useRef<L.Marker>(null);
 
-  const icon = L.divIcon({
-    className: "",
-    html: ReactDOMServer.renderToString(
-      <FontAwesomeIcon icon={faToilet} size="xl" opacity={`${opacity}%`} />,
-    ),
-  });
+  const icon = useMemo(() => {
+    return L.divIcon({
+      className: "",
+      html: ReactDOMServer.renderToString(
+        <FontAwesomeIcon icon={faToilet} size="2xl" />,
+      ),
+    });
+  }, []);
 
-  // TODO: change opacity to 100 on click of marker but reset on click outside
   const eventHandlers: LeafletEventHandlerFnMap = useMemo(
     () => ({
+      mouseover() {
+        setOpacity(1);
+      },
+      mouseout() {
+        setOpacity(0.7);
+      },
       click() {
-        const marker = markerRef.current;
-        if (marker != null) {
-          setOpacity(100);
+        // TODO: View toilet details + edit + delete
+        if (selectedToilet !== toilet) {
+          setSelectedToilet(toilet);
+          setOpenDetails(true);
+        }
+      },
+      keypress() {
+        if (selectedToilet !== toilet) {
+          setSelectedToilet(toilet);
+          setOpenDetails(true);
         }
       },
     }),
-    [],
+    [selectedToilet, toilet, setSelectedToilet, setOpenDetails],
   );
 
   return (
@@ -41,6 +67,9 @@ const ToiletMarker: React.FC<ToiletMarkerProps> = (props) => {
         icon={icon}
         position={position}
         eventHandlers={eventHandlers}
+        riseOnHover
+        opacity={opacity}
+        alt="toilet marker"
       />
     )
   );

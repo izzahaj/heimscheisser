@@ -1,8 +1,10 @@
 import { LatLng, Map as LeafletMap } from "leaflet";
 import { MapContainer, TileLayer, ZoomControl } from "react-leaflet";
 
-import { MIN_ZOOM } from "../../constants/MapValues";
+import { MIN_ZOOM } from "../../constants/mapValues";
+import { BidetType, Gender } from "../../constants/toiletValues";
 import useToiletFetcher from "../../hooks/useToiletFetcher";
+import { Toilet } from "../../types/Toilet.types";
 import AddToiletMarker from "./AddToiletMarker";
 import MyLocationMarker from "./MyLocationMarker";
 import ToiletMarker from "./ToiletMarker";
@@ -14,6 +16,9 @@ type MapProps = {
   setAddToiletPosition: React.Dispatch<React.SetStateAction<LatLng | null>>;
   addToiletPosition: LatLng | null;
   isActive: boolean;
+  selectedToilet: Toilet | null;
+  setSelectedToilet: React.Dispatch<React.SetStateAction<Toilet | null>>;
+  setOpenDetails: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
 const Map: React.FC<MapProps> = (props) => {
@@ -24,6 +29,9 @@ const Map: React.FC<MapProps> = (props) => {
     setAddToiletPosition,
     addToiletPosition,
     isActive,
+    setSelectedToilet,
+    selectedToilet,
+    setOpenDetails,
   } = props;
 
   const toilets = useToiletFetcher(map);
@@ -55,9 +63,33 @@ const Map: React.FC<MapProps> = (props) => {
       {toilets.map((toilet) => (
         <ToiletMarker
           key={toilet.id}
+          toilet={toilet}
           position={[toilet.latitude, toilet.longitude]}
+          selectedToilet={selectedToilet}
+          setSelectedToilet={setSelectedToilet}
+          setOpenDetails={setOpenDetails}
         />
       ))}
+      <ToiletMarker
+        position={[1.3525, 103.8215]}
+        toilet={{
+          id: "toilet_id",
+          name: "MacRitchie Reservoir Toilet long name sadjasldj lasjdkla ld dsadadasdadasdsa",
+          description:
+            "Near carpark. Random kinda long description hosdhjioasdiojdoasoiajdosid" +
+            "asdjoasjd oaso djaso ji about the toilet that no one is going to read",
+          latitude: 1.3525,
+          longitude: 103.8215,
+          genders: [Gender.Female, Gender.Male],
+          hasBidet: true,
+          isPaid: false,
+          hasHandicap: true,
+          bidetTypes: [BidetType.HandHeld],
+        }}
+        selectedToilet={selectedToilet}
+        setSelectedToilet={setSelectedToilet}
+        setOpenDetails={setOpenDetails}
+      />
     </MapContainer>
   );
 };

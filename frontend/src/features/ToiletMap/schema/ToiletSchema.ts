@@ -5,7 +5,7 @@ import {
   Gender,
   TOILET_DESC_MAX_LEN,
   TOILET_NAME_MAX_LEN,
-} from "../constants/ToiletValues";
+} from "../constants/toiletValues";
 
 export const toiletSchema = Yup.object().shape({
   name: Yup.string()

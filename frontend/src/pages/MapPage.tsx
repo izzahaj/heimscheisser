@@ -9,33 +9,19 @@ import {
   MapPinX,
   Search,
 } from "lucide-react";
-import { useRef, useState } from "react";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 
-import useMediaQuery from "@/common/hooks/useMediaQuery";
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import {
-  Drawer,
-  DrawerContent,
-  DrawerDescription,
-  DrawerHeader,
-  DrawerTitle,
-} from "@/components/ui/drawer";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { AddToiletForm } from "@/features/ToiletMap/components/AddToilet";
-import { toiletSchema } from "@/features/ToiletMap/schema/ToiletSchema";
-import { cn } from "@/lib/utils";
+import AddToiletDialog from "@/features/ToiletMap/components/AddToilet/AddToiletDialog";
+import { ToiletDetails } from "@/features/ToiletMap/components/ToiletDetails";
+import { toiletSchema } from "@/features/ToiletMap/schema/toiletSchema";
+import { Toilet } from "@/features/ToiletMap/types/Toilet.types";
 
 import { Map } from "../features/ToiletMap/components/Map";
 
@@ -48,28 +34,9 @@ const MapPage = () => {
   );
   const [isSelectingToiletLocation, setIsSelectingToiletLocation] =
     useState(false);
-  const [openForm, setOpenForm] = useState(false);
-  const isTablet = useMediaQuery("md");
-  const skipResetRef = useRef(false);
-
-  const defaultValues = {
-    name: "",
-    latitude: null,
-    longitude: null,
-    description: "",
-    genders: [],
-    hasHandicap: false,
-    hasBidet: false,
-    bidetTypes: [],
-    isPaid: false,
-  };
-
-  const methods = useForm({
-    resolver: yupResolver(toiletSchema),
-    defaultValues,
-  });
-
-  const { watch, setValue, reset } = methods;
+  const [openAddToiletDialog, setOpenAddToiletDialog] = useState(false);
+  const [toilet, setToilet] = useState<Toilet | null>(null);
+  const [openToiletDetails, setOpenToiletDetails] = useState(false);
 
   const handleFindMyLocation = () => {
     if (map) {
@@ -90,14 +57,24 @@ const MapPage = () => {
     }
   };
 
-  const handleOnOpenChange = (isOpen: boolean) => {
-    setOpenForm(isOpen);
-    if (!isOpen && !skipResetRef.current) {
-      reset(); // reset form if closed not via Edit Map Location
-      setAddToiletPosition(null);
-    }
-    skipResetRef.current = false; // reset the flag after close
+  const defaultValues = {
+    name: "",
+    latitude: null,
+    longitude: null,
+    description: "",
+    genders: [],
+    hasHandicap: false,
+    hasBidet: false,
+    bidetTypes: [],
+    isPaid: false,
   };
+
+  const methods = useForm({
+    resolver: yupResolver(toiletSchema),
+    defaultValues,
+  });
+
+  const { watch, setValue } = methods;
 
   const handleAddToilet = () => {
     if (map) {
@@ -105,17 +82,7 @@ const MapPage = () => {
       setValue("latitude", center.lat);
       setValue("longitude", center.lng);
       setAddToiletPosition(center);
-      setOpenForm(true);
-    }
-  };
-
-  const handleSelectLocation = () => {
-    skipResetRef.current = true;
-    if (map) {
-      setIsSelectingToiletLocation(true);
-      const position = new LatLng(watch("latitude")!, watch("longitude")!);
-      setAddToiletPosition(position);
-      map.flyTo(position, map.getZoom());
+      setOpenAddToiletDialog(true);
     }
   };
 
@@ -124,7 +91,7 @@ const MapPage = () => {
       const position = new LatLng(watch("latitude")!, watch("longitude")!);
       map.flyTo(position, map.getZoom());
       setAddToiletPosition(position);
-      setOpenForm(true);
+      setOpenAddToiletDialog(true);
       setIsSelectingToiletLocation(false);
     }
   };
@@ -135,7 +102,7 @@ const MapPage = () => {
       setValue("latitude", addToiletPosition!.lat);
       setValue("longitude", addToiletPosition!.lng);
       setAddToiletPosition(addToiletPosition);
-      setOpenForm(true);
+      setOpenAddToiletDialog(true);
       setIsSelectingToiletLocation(false);
     }
   };
@@ -149,6 +116,9 @@ const MapPage = () => {
         setAddToiletPosition={setAddToiletPosition}
         addToiletPosition={addToiletPosition}
         isActive={isSelectingToiletLocation}
+        setSelectedToilet={setToilet}
+        selectedToilet={toilet}
+        setOpenDetails={setOpenToiletDetails}
       />
       <div className="fixed right-3 bottom-5 flex flex-col gap-y-1 z-600">
         {!isSelectingToiletLocation && (
@@ -228,43 +198,19 @@ const MapPage = () => {
           </TooltipContent>
         </Tooltip>
       </div>
-      {isTablet ? (
-        <Dialog open={openForm} onOpenChange={handleOnOpenChange}>
-          <DialogContent className="max-h-[90vh] overflow-hidden flex flex-col">
-            <DialogHeader>
-              <DialogTitle>Add Toilet</DialogTitle>
-              <DialogDescription>
-                Know a loo we don't? Add it to the map!
-              </DialogDescription>
-            </DialogHeader>
-            <AddToiletForm
-              methods={methods}
-              handleClose={() => setOpenForm(false)}
-              handleSelectLocation={handleSelectLocation}
-            />
-          </DialogContent>
-        </Dialog>
-      ) : (
-        <Drawer open={openForm} onOpenChange={handleOnOpenChange}>
-          <DrawerContent
-            className={cn(
-              "overflow-hidden flex flex-col p-1 data-[vaul-drawer-direction=bottom]:max-h-[100vh]",
-            )}
-          >
-            <DrawerHeader>
-              <DrawerTitle>Add Toilet</DrawerTitle>
-              <DrawerDescription>
-                Know a loo we don't? Add it to the map!
-              </DrawerDescription>
-            </DrawerHeader>
-            <AddToiletForm
-              methods={methods}
-              handleClose={() => setOpenForm(false)}
-              handleSelectLocation={handleSelectLocation}
-            />
-          </DrawerContent>
-        </Drawer>
-      )}
+      <AddToiletDialog
+        open={openAddToiletDialog}
+        setOpen={setOpenAddToiletDialog}
+        map={map}
+        setToiletPosition={setAddToiletPosition}
+        setIsSelectingToiletLocation={setIsSelectingToiletLocation}
+        methods={methods}
+      />
+      <ToiletDetails
+        open={openToiletDetails}
+        setOpen={setOpenToiletDetails}
+        toilet={toilet}
+      />
     </>
   );
 };

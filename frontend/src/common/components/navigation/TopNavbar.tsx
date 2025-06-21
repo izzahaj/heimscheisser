@@ -21,7 +21,7 @@ const TopNavbar = () => {
       <NavigationMenuList className="w-full bg-rose-200">
         <NavigationMenuItem>
           <NavigationMenuLink
-            className={cn(navigationMenuTriggerStyle())}
+            className={cn(navigationMenuTriggerStyle(), "px-3")}
             asChild
           >
             <Link to="/" className="flex flex-row gap-x-1 items-center">
@@ -34,7 +34,7 @@ const TopNavbar = () => {
       <NavigationMenuList>
         <NavigationMenuItem>
           <NavigationMenuLink
-            className={cn(navigationMenuTriggerStyle())}
+            className={cn(navigationMenuTriggerStyle(), "px-3")}
             asChild
           >
             <Link to="/map" className="flex flex-row gap-x-1 items-center">

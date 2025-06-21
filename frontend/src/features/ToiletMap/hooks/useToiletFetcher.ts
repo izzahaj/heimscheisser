@@ -5,7 +5,7 @@ import { useDebouncedCallback } from "use-debounce";
 
 import { TOILET_SVC_NEARBY_URI } from "@/config/uris";
 
-import { MIN_ZOOM } from "../constants/MapValues";
+import { MIN_ZOOM } from "../constants/mapValues";
 import { Toilet } from "../types/Toilet.types";
 
 type Tile = {
@@ -159,7 +159,7 @@ const useToiletFetcher = (map: LeafletMap | null) => {
     } catch (error) {
       console.error("Failed to fetch toilets:", error);
     }
-  }, 750);
+  }, 800);
 
   const handleMapMoveEnd = useCallback(() => {
     if (!map) {

@@ -1,8 +1,7 @@
-import axios from "axios";
 import { Loader } from "lucide-react";
-import { UseFormReturn } from "react-hook-form";
+import { useFormContext } from "react-hook-form";
 
-import FormProvider, {
+import {
   RHFCheckbox,
   RHFInput,
   RHFMultiSelect,
@@ -10,87 +9,29 @@ import FormProvider, {
 } from "@/common/components/hook-form";
 import { Button } from "@/components/ui/button";
 import { DialogClose } from "@/components/ui/dialog";
-import { TOILET_SVC_URI } from "@/config/uris";
 
 import {
-  BidetType,
   bidetTypeOptions,
-  Gender,
   genderOptions,
   TOILET_DESC_MAX_LEN,
   TOILET_NAME_MAX_LEN,
-} from "../../constants/ToiletValues";
+} from "../../constants/toiletValues";
 
 type AddToiletFormProps = {
-  methods: UseFormReturn<
-    {
-      name: string;
-      latitude: number | null;
-      longitude: number | null;
-      description: string | undefined;
-      genders: (Gender | undefined)[];
-      hasHandicap: boolean;
-      hasBidet: boolean;
-      bidetTypes: (BidetType | undefined)[] | undefined;
-      isPaid: NonNullable<boolean>;
-    },
-    unknown,
-    {
-      description?: string | undefined;
-      bidetTypes?: (BidetType | undefined)[] | undefined;
-      name: string;
-      latitude: number | null;
-      longitude: number | null;
-      genders: (Gender | undefined)[];
-      hasHandicap: boolean;
-      hasBidet: NonNullable<boolean>;
-      isPaid: NonNullable<boolean>;
-    }
-  >;
   handleSelectLocation: VoidFunction;
   handleClose: VoidFunction;
 };
 
 const AddToiletForm: React.FC<AddToiletFormProps> = (props) => {
-  const { methods, handleSelectLocation, handleClose } = props;
+  const { handleSelectLocation, handleClose } = props;
 
   const {
     watch,
-    handleSubmit,
     formState: { isSubmitting },
-  } = methods;
-
-  const onSubmit = handleSubmit(async (data) => {
-    console.log(data);
-    if (!data.hasBidet) {
-      data.bidetTypes = [];
-    }
-
-    const url = TOILET_SVC_URI;
-    const config = {
-      headers: {
-        "Content-Type": "application/json",
-      },
-    };
-
-    try {
-      const response = await axios.post(url, data, config);
-      // TODO: Add new toilet marker
-      // TODO: Add success toast
-      console.log(response);
-      handleClose();
-    } catch (err) {
-      console.log(err);
-      // TODO: handle error with alert
-    }
-  });
+  } = useFormContext();
 
   return (
-    <FormProvider
-      methods={methods}
-      onSubmit={onSubmit}
-      className="flex flex-col flex-1 overflow-hidden"
-    >
+    <>
       <div className="flex flex-col px-4 py-2 overflow-auto gap-5">
         <RHFInput
           type="text"
@@ -154,7 +95,7 @@ const AddToiletForm: React.FC<AddToiletFormProps> = (props) => {
           Submit
         </Button>
       </div>
-    </FormProvider>
+    </>
   );
 };
 

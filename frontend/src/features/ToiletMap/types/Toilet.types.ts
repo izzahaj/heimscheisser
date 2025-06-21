@@ -1,4 +1,4 @@
-import { BidetType, Gender } from "../constants/ToiletValues";
+import { BidetType, Gender } from "../constants/toiletValues";
 
 export type Toilet = {
   id: string;
