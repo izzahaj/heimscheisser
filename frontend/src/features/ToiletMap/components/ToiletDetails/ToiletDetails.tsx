@@ -4,11 +4,14 @@ import {
   Droplet,
   DropletOff,
   Droplets,
+  Pencil,
   VenusAndMars,
 } from "lucide-react";
+import { UseFormReset } from "react-hook-form";
 
 import useMediaQuery from "@/common/hooks/useMediaQuery";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   Drawer,
   DrawerContent,
@@ -25,17 +28,57 @@ import {
 } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
 
+import { BidetType, Gender } from "../../constants/toiletValues";
 import { Toilet } from "../../types/Toilet.types";
 
 type ToiletDetailsProps = {
   open: boolean;
   setOpen: React.Dispatch<React.SetStateAction<boolean>>;
   toilet: Toilet | null;
+  setOpenEditDialog: React.Dispatch<React.SetStateAction<boolean>>;
+  resetEditForm: UseFormReset<{
+    name: string;
+    latitude: number | null;
+    longitude: number | null;
+    description: string | undefined;
+    genders: (Gender | undefined)[];
+    hasHandicap: boolean;
+    hasBidet: boolean;
+    bidetTypes: (BidetType | undefined)[] | undefined;
+    isPaid: NonNullable<boolean>;
+  }>;
+  defaultValues: {
+    name: string;
+    latitude: number | null;
+    longitude: number | null;
+    description: string;
+    genders: Gender[];
+    hasHandicap: boolean;
+    hasBidet: boolean;
+    bidetTypes: BidetType[];
+    isPaid: boolean;
+  };
+  setMode: React.Dispatch<React.SetStateAction<"add" | "edit">>;
 };
 
 const ToiletDetails: React.FC<ToiletDetailsProps> = (props) => {
-  const { open, setOpen, toilet } = props;
+  const {
+    open,
+    setOpen,
+    toilet,
+    setOpenEditDialog,
+    resetEditForm,
+    defaultValues,
+    setMode,
+  } = props;
   const isTablet = useMediaQuery("md");
+
+  const handleOpenEditDialog = () => {
+    setMode("edit");
+    setOpenEditDialog(true);
+    resetEditForm(defaultValues);
+    setOpen(false);
+  };
 
   return (
     <>
@@ -99,6 +142,14 @@ const ToiletDetails: React.FC<ToiletDetailsProps> = (props) => {
                   </div>
                 </div>
               )}
+              <Button
+                className="self-center"
+                size="sm"
+                variant="outline"
+                onClick={handleOpenEditDialog}
+              >
+                <Pencil /> Edit
+              </Button>
             </div>
           </SheetContent>
         </Sheet>
@@ -163,6 +214,14 @@ const ToiletDetails: React.FC<ToiletDetailsProps> = (props) => {
                   </div>
                 </div>
               )}
+              <Button
+                className="self-center"
+                size="sm"
+                variant="outline"
+                onClick={handleOpenEditDialog}
+              >
+                <Pencil /> Edit
+              </Button>
             </div>
           </DrawerContent>
         </Drawer>

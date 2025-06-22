@@ -1,5 +1,5 @@
 import axios from "axios";
-import { LatLng, Map } from "leaflet";
+import { LatLng, latLng, Map } from "leaflet";
 import { useRef } from "react";
 import { UseFormReturn } from "react-hook-form";
 import { toast } from "sonner";
@@ -24,7 +24,7 @@ import { TOILET_SVC_URI } from "@/config/uris";
 import { cn } from "@/lib/utils";
 
 import { BidetType, Gender } from "../../constants/toiletValues";
-import AddToiletForm from "./AddToiletForm";
+import ToiletForm from "./ToiletForm";
 
 type AddToiletDialogProps = {
   open: boolean;
@@ -86,7 +86,7 @@ const AddToiletDialog: React.FC<AddToiletDialogProps> = (props) => {
     skipResetRef.current = true;
     if (map) {
       setIsSelectingToiletLocation(true);
-      const position = new LatLng(watch("latitude")!, watch("longitude")!);
+      const position = latLng(watch("latitude")!, watch("longitude")!);
       setToiletPosition(position);
       map.flyTo(position, map.getZoom());
     }
@@ -133,7 +133,7 @@ const AddToiletDialog: React.FC<AddToiletDialogProps> = (props) => {
               onSubmit={onSubmit}
               className="flex flex-col flex-1 overflow-hidden"
             >
-              <AddToiletForm
+              <ToiletForm
                 handleClose={() => setOpen(false)}
                 handleSelectLocation={handleSelectLocation}
               />
@@ -158,7 +158,7 @@ const AddToiletDialog: React.FC<AddToiletDialogProps> = (props) => {
               onSubmit={onSubmit}
               className="flex flex-col flex-1 overflow-hidden"
             >
-              <AddToiletForm
+              <ToiletForm
                 handleClose={() => setOpen(false)}
                 handleSelectLocation={handleSelectLocation}
               />

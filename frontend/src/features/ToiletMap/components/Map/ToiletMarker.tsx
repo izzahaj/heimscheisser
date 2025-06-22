@@ -1,6 +1,6 @@
 import { faToilet } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import L, { LatLngExpression, LeafletEventHandlerFnMap } from "leaflet";
+import L, { LatLng, LeafletEventHandlerFnMap } from "leaflet";
 import { useMemo, useRef, useState } from "react";
 import ReactDOMServer from "react-dom/server";
 import { Marker } from "react-leaflet";
@@ -8,7 +8,7 @@ import { Marker } from "react-leaflet";
 import { Toilet } from "../../types/Toilet.types";
 
 type ToiletMarkerProps = {
-  position: LatLngExpression | null;
+  position: LatLng | null;
   setSelectedToilet: React.Dispatch<React.SetStateAction<Toilet | null>>;
   toilet: Toilet;
   selectedToilet: Toilet | null;
@@ -29,6 +29,7 @@ const ToiletMarker: React.FC<ToiletMarkerProps> = (props) => {
   const icon = useMemo(() => {
     return L.divIcon({
       className: "",
+      iconAnchor: [10, 14],
       html: ReactDOMServer.renderToString(
         <FontAwesomeIcon icon={faToilet} size="2xl" />,
       ),
@@ -44,7 +45,7 @@ const ToiletMarker: React.FC<ToiletMarkerProps> = (props) => {
         setOpacity(0.7);
       },
       click() {
-        // TODO: View toilet details + edit + delete
+        // TODO: edit + delete toilet
         if (selectedToilet !== toilet) {
           setSelectedToilet(toilet);
           setOpenDetails(true);

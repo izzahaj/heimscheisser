@@ -1,4 +1,4 @@
-import { Loader } from "lucide-react";
+import { Loader, LocationEdit } from "lucide-react";
 import { useFormContext } from "react-hook-form";
 
 import {
@@ -17,12 +17,12 @@ import {
   TOILET_NAME_MAX_LEN,
 } from "../../constants/toiletValues";
 
-type AddToiletFormProps = {
+type ToiletFormProps = {
   handleSelectLocation: VoidFunction;
   handleClose: VoidFunction;
 };
 
-const AddToiletForm: React.FC<AddToiletFormProps> = (props) => {
+const ToiletForm: React.FC<ToiletFormProps> = (props) => {
   const { handleSelectLocation, handleClose } = props;
 
   const {
@@ -51,7 +51,9 @@ const AddToiletForm: React.FC<AddToiletFormProps> = (props) => {
           helperText="Provide more specifics e.g. floor number, next to a landmark, etc."
         />
         <DialogClose asChild>
-          <Button onClick={handleSelectLocation}>Edit Map Location</Button>
+          <Button onClick={handleSelectLocation}>
+            <LocationEdit /> Edit Map Location
+          </Button>
         </DialogClose>
         <RHFMultiSelect
           name="genders"
@@ -80,6 +82,7 @@ const AddToiletForm: React.FC<AddToiletFormProps> = (props) => {
       </div>
       <div className="flex flex-row justify-around md:justify-end gap-2 p-1">
         <Button
+          type="button"
           variant="outline"
           className="flex-1 md:flex-0"
           onClick={handleClose}
@@ -99,4 +102,4 @@ const AddToiletForm: React.FC<AddToiletFormProps> = (props) => {
   );
 };
 
-export default AddToiletForm;
+export default ToiletForm;
