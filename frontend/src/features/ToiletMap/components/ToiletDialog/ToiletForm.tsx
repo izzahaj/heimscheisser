@@ -1,4 +1,5 @@
 import { Loader, LocationEdit } from "lucide-react";
+import { useEffect } from "react";
 import { useFormContext } from "react-hook-form";
 
 import {
@@ -27,8 +28,15 @@ const ToiletForm: React.FC<ToiletFormProps> = (props) => {
 
   const {
     watch,
+    setValue,
     formState: { isSubmitting },
   } = useFormContext();
+
+  useEffect(() => {
+    if (!watch("hasBidet")) {
+      setValue("bidetTypes", []);
+    }
+  }, [watch("hasBidet")]);
 
   return (
     <>

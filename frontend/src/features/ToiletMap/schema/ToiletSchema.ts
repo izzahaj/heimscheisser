@@ -18,13 +18,11 @@ export const toiletSchema = Yup.object().shape({
   latitude: Yup.number()
     .required("Latitude is required")
     .min(-90, "Latitude must be between -90 and 90")
-    .max(90, "Latitude must be between -90 and 90")
-    .nullable(),
+    .max(90, "Latitude must be between -90 and 90"),
   longitude: Yup.number()
     .required("Longitude is required")
     .min(-180, "Longitude must be between -180 and 180")
-    .max(180, "Longitude must be between -180 and 180")
-    .nullable(),
+    .max(180, "Longitude must be between -180 and 180"),
   description: Yup.string().max(
     TOILET_DESC_MAX_LEN,
     `Description must not be more than ${TOILET_DESC_MAX_LEN} characters`,

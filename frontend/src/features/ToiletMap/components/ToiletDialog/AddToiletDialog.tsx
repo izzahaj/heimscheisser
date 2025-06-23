@@ -3,6 +3,7 @@ import { LatLng, latLng, Map } from "leaflet";
 import { useRef } from "react";
 import { UseFormReturn } from "react-hook-form";
 import { toast } from "sonner";
+import { InferType } from "yup";
 
 import FormProvider from "@/common/components/hook-form";
 import useMediaQuery from "@/common/hooks/useMediaQuery";
@@ -23,7 +24,7 @@ import {
 import { TOILET_SVC_URI } from "@/config/uris";
 import { cn } from "@/lib/utils";
 
-import { BidetType, Gender } from "../../constants/toiletValues";
+import { toiletSchema } from "../../schema/toiletSchema";
 import ToiletForm from "./ToiletForm";
 
 type AddToiletDialogProps = {
@@ -32,31 +33,7 @@ type AddToiletDialogProps = {
   map: Map | null;
   setToiletPosition: React.Dispatch<React.SetStateAction<LatLng | null>>;
   setIsSelectingToiletLocation: React.Dispatch<React.SetStateAction<boolean>>;
-  methods: UseFormReturn<
-    {
-      name: string;
-      latitude: number | null;
-      longitude: number | null;
-      description: string | undefined;
-      genders: (Gender | undefined)[];
-      hasHandicap: boolean;
-      hasBidet: boolean;
-      bidetTypes: (BidetType | undefined)[] | undefined;
-      isPaid: NonNullable<boolean>;
-    },
-    unknown,
-    {
-      description?: string | undefined;
-      bidetTypes?: (BidetType | undefined)[] | undefined;
-      name: string;
-      latitude: number | null;
-      longitude: number | null;
-      genders: (Gender | undefined)[];
-      hasHandicap: boolean;
-      hasBidet: NonNullable<boolean>;
-      isPaid: NonNullable<boolean>;
-    }
-  >;
+  methods: UseFormReturn<InferType<typeof toiletSchema>>;
 };
 
 const AddToiletDialog: React.FC<AddToiletDialogProps> = (props) => {
@@ -94,9 +71,6 @@ const AddToiletDialog: React.FC<AddToiletDialogProps> = (props) => {
 
   const onSubmit = handleSubmit(async (data) => {
     console.log(data);
-    if (!data.hasBidet) {
-      data.bidetTypes = [];
-    }
 
     const url = TOILET_SVC_URI;
     const config = {

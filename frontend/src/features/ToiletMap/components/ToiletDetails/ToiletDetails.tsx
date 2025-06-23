@@ -7,7 +7,8 @@ import {
   Pencil,
   VenusAndMars,
 } from "lucide-react";
-import { UseFormReset } from "react-hook-form";
+import { UseFormReturn } from "react-hook-form";
+import { InferType } from "yup";
 
 import useMediaQuery from "@/common/hooks/useMediaQuery";
 import { Badge } from "@/components/ui/badge";
@@ -29,6 +30,7 @@ import {
 import { cn } from "@/lib/utils";
 
 import { BidetType, Gender } from "../../constants/toiletValues";
+import { toiletSchema } from "../../schema/toiletSchema";
 import { Toilet } from "../../types/Toilet.types";
 
 type ToiletDetailsProps = {
@@ -36,21 +38,10 @@ type ToiletDetailsProps = {
   setOpen: React.Dispatch<React.SetStateAction<boolean>>;
   toilet: Toilet | null;
   setOpenEditDialog: React.Dispatch<React.SetStateAction<boolean>>;
-  resetEditForm: UseFormReset<{
-    name: string;
-    latitude: number | null;
-    longitude: number | null;
-    description: string | undefined;
-    genders: (Gender | undefined)[];
-    hasHandicap: boolean;
-    hasBidet: boolean;
-    bidetTypes: (BidetType | undefined)[] | undefined;
-    isPaid: NonNullable<boolean>;
-  }>;
   defaultValues: {
     name: string;
-    latitude: number | null;
-    longitude: number | null;
+    latitude: number;
+    longitude: number;
     description: string;
     genders: Gender[];
     hasHandicap: boolean;
@@ -58,6 +49,7 @@ type ToiletDetailsProps = {
     bidetTypes: BidetType[];
     isPaid: boolean;
   };
+  methods: UseFormReturn<InferType<typeof toiletSchema>>;
   setMode: React.Dispatch<React.SetStateAction<"add" | "edit">>;
 };
 
@@ -67,16 +59,18 @@ const ToiletDetails: React.FC<ToiletDetailsProps> = (props) => {
     setOpen,
     toilet,
     setOpenEditDialog,
-    resetEditForm,
     defaultValues,
     setMode,
+    methods,
   } = props;
+
+  const { reset } = methods;
   const isTablet = useMediaQuery("md");
 
   const handleOpenEditDialog = () => {
     setMode("edit");
     setOpenEditDialog(true);
-    resetEditForm(defaultValues);
+    reset(defaultValues);
     setOpen(false);
   };
 

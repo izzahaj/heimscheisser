@@ -1,7 +1,8 @@
 import { yupResolver } from "@hookform/resolvers/yup";
 import { LatLng, Map as LeafletMap } from "leaflet";
 import { useMemo, useState } from "react";
-import { useForm } from "react-hook-form";
+import { Resolver, useForm } from "react-hook-form";
+import { InferType } from "yup";
 
 import { ToiletDetails } from "@/features/ToiletMap/components/ToiletDetails";
 import {
@@ -30,8 +31,8 @@ const MapPage = () => {
 
   const defaultValues = {
     name: "",
-    latitude: null,
-    longitude: null,
+    latitude: 0,
+    longitude: 0,
     description: "",
     genders: [],
     hasHandicap: false,
@@ -40,16 +41,18 @@ const MapPage = () => {
     isPaid: false,
   };
 
-  const methods = useForm({
-    resolver: yupResolver(toiletSchema),
+  const methods = useForm<InferType<typeof toiletSchema>>({
+    resolver: yupResolver(toiletSchema) as Resolver<
+      InferType<typeof toiletSchema>
+    >,
     defaultValues,
   });
 
   const defaultEditValues = useMemo(
     () => ({
       name: toilet?.name || "",
-      latitude: toilet?.latitude || null,
-      longitude: toilet?.longitude || null,
+      latitude: toilet?.latitude || 0,
+      longitude: toilet?.longitude || 0,
       description: toilet?.description || "",
       genders: toilet?.genders || [],
       hasHandicap: toilet?.hasHandicap || false,
@@ -60,12 +63,12 @@ const MapPage = () => {
     [toilet],
   );
 
-  const editMethods = useForm({
-    resolver: yupResolver(toiletSchema),
+  const editMethods = useForm<InferType<typeof toiletSchema>>({
+    resolver: yupResolver(toiletSchema) as Resolver<
+      InferType<typeof toiletSchema>
+    >,
     defaultValues: defaultEditValues,
   });
-
-  const { reset } = editMethods;
 
   return (
     <>
@@ -118,7 +121,7 @@ const MapPage = () => {
         setOpen={setOpenToiletDetails}
         toilet={toilet}
         setOpenEditDialog={setOpenEditToiletDialog}
-        resetEditForm={reset}
+        methods={editMethods}
         defaultValues={defaultEditValues}
         setMode={setMode}
       />

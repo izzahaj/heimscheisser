@@ -3,9 +3,11 @@ import { LatLng, latLng, Map } from "leaflet";
 import { useRef } from "react";
 import { UseFormReturn } from "react-hook-form";
 import { toast } from "sonner";
+import { InferType } from "yup";
 
 import FormProvider from "@/common/components/hook-form";
 import useMediaQuery from "@/common/hooks/useMediaQuery";
+import { filterChangedFormFields } from "@/common/utils/utils";
 import {
   Dialog,
   DialogContent,
@@ -21,7 +23,7 @@ import {
 import { TOILET_SVC_URI } from "@/config/uris";
 import { cn } from "@/lib/utils";
 
-import { BidetType, Gender } from "../../constants/toiletValues";
+import { toiletSchema } from "../../schema/toiletSchema";
 import { Toilet } from "../../types/Toilet.types";
 import ToiletForm from "./ToiletForm";
 
@@ -32,43 +34,9 @@ type EditToiletDialogProps = {
   map: Map | null;
   setToiletPosition: React.Dispatch<React.SetStateAction<LatLng | null>>;
   setIsSelectingToiletLocation: React.Dispatch<React.SetStateAction<boolean>>;
-  methods: UseFormReturn<
-    {
-      name: string;
-      latitude: number | null;
-      longitude: number | null;
-      description: string | undefined;
-      genders: (Gender | undefined)[];
-      hasHandicap: boolean;
-      hasBidet: boolean;
-      bidetTypes: (BidetType | undefined)[] | undefined;
-      isPaid: NonNullable<boolean>;
-    },
-    unknown,
-    {
-      description?: string | undefined;
-      bidetTypes?: (BidetType | undefined)[] | undefined;
-      name: string;
-      latitude: number | null;
-      longitude: number | null;
-      genders: (Gender | undefined)[];
-      hasHandicap: boolean;
-      hasBidet: NonNullable<boolean>;
-      isPaid: NonNullable<boolean>;
-    }
-  >;
+  methods: UseFormReturn<InferType<typeof toiletSchema>>;
   setOpenToiletDetails: React.Dispatch<React.SetStateAction<boolean>>;
-  defaultValues: {
-    name: string;
-    latitude: number | null;
-    longitude: number | null;
-    description: string;
-    genders: Gender[];
-    hasHandicap: boolean;
-    hasBidet: boolean;
-    bidetTypes: BidetType[];
-    isPaid: boolean;
-  };
+  defaultValues: Omit<Toilet, "id">;
 };
 
 const EditToiletDialog: React.FC<EditToiletDialogProps> = (props) => {
@@ -87,7 +55,12 @@ const EditToiletDialog: React.FC<EditToiletDialogProps> = (props) => {
   const skipResetRef = useRef(false);
   const isTablet = useMediaQuery("md");
 
-  const { watch, handleSubmit, reset } = methods;
+  const {
+    watch,
+    handleSubmit,
+    reset,
+    formState: { dirtyFields },
+  } = methods;
 
   const handleOpen = (isOpen: boolean) => {
     setOpen(isOpen);
@@ -111,11 +84,8 @@ const EditToiletDialog: React.FC<EditToiletDialogProps> = (props) => {
   };
 
   const onSubmit = handleSubmit(async (data) => {
-    console.log(data);
-    if (!data.hasBidet) {
-      data.bidetTypes = [];
-    }
-
+    const dirtyData = filterChangedFormFields(data, dirtyFields);
+    console.log(dirtyData);
     const url = `${TOILET_SVC_URI}/${toilet?.id}`;
     const config = {
       headers: {
@@ -124,7 +94,7 @@ const EditToiletDialog: React.FC<EditToiletDialogProps> = (props) => {
     };
 
     try {
-      const response = await axios.patch(url, data, config);
+      const response = await axios.patch(url, dirtyData, config);
       // TODO: Add new toilet marker
       console.log(response);
       toast.success("Toilet edited successfully!");

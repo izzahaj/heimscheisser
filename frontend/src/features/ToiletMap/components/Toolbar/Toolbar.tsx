@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import { UseFormReturn } from "react-hook-form";
+import { InferType } from "yup";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -18,7 +19,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 
-import { BidetType, Gender } from "../../constants/toiletValues";
+import { toiletSchema } from "../../schema/toiletSchema";
 
 type ToolbarProps = {
   map: Map | null;
@@ -30,31 +31,7 @@ type ToolbarProps = {
   setAddToiletPosition: React.Dispatch<React.SetStateAction<LatLng | null>>;
   setOpenAddToiletDialog: React.Dispatch<React.SetStateAction<boolean>>;
   setOpenEditToiletDialog: React.Dispatch<React.SetStateAction<boolean>>;
-  methods: UseFormReturn<
-    {
-      name: string;
-      latitude: number | null;
-      longitude: number | null;
-      description: string | undefined;
-      genders: (Gender | undefined)[];
-      hasHandicap: boolean;
-      hasBidet: boolean;
-      bidetTypes: (BidetType | undefined)[] | undefined;
-      isPaid: NonNullable<boolean>;
-    },
-    unknown,
-    {
-      description?: string | undefined;
-      bidetTypes?: (BidetType | undefined)[] | undefined;
-      name: string;
-      latitude: number | null;
-      longitude: number | null;
-      genders: (Gender | undefined)[];
-      hasHandicap: boolean;
-      hasBidet: NonNullable<boolean>;
-      isPaid: NonNullable<boolean>;
-    }
-  >;
+  methods: UseFormReturn<InferType<typeof toiletSchema>>;
   mode: "add" | "edit";
   setMode: React.Dispatch<React.SetStateAction<"add" | "edit">>;
 };
