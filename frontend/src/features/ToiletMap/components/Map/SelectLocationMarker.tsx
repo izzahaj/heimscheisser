@@ -46,6 +46,7 @@ const SelectLocationMarker: React.FC = () => {
         draggable={true}
         eventHandlers={eventHandlers}
         ref={markerRef}
+        riseOnHover
       />
     )
   );

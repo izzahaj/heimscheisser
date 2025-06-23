@@ -6,16 +6,20 @@ interface MapState {
   toiletPosition: { lat: number; lng: number } | null; // LatLng is non-serializable
   selectedToilet: Toilet | null;
   isSelectingToiletLocation: boolean;
-  isAddToiletDialogOpen: boolean;
-  isEditToiletDialogOpen: boolean;
+  openAddToiletDialog: boolean;
+  openEditToiletDialog: boolean;
+  mode: "add" | "edit";
+  openToiletDetails: boolean;
 }
 
 const initialState: MapState = {
   toiletPosition: null,
   selectedToilet: null,
   isSelectingToiletLocation: false,
-  isAddToiletDialogOpen: false,
-  isEditToiletDialogOpen: false,
+  openAddToiletDialog: false,
+  openEditToiletDialog: false,
+  mode: "add",
+  openToiletDetails: false,
 };
 
 export const mapSlice = createSlice({
@@ -25,8 +29,10 @@ export const mapSlice = createSlice({
     selectToiletPosition: (state) => state.toiletPosition,
     selectSelectedToilet: (state) => state.selectedToilet,
     selectIsSelectingToiletLocation: (state) => state.isSelectingToiletLocation,
-    selectIsAddToiletDialogOpen: (state) => state.isAddToiletDialogOpen,
-    selectIsEditToiletDialogOpen: (state) => state.isEditToiletDialogOpen,
+    selectOpenAddToiletDialog: (state) => state.openAddToiletDialog,
+    selectOpenEditToiletDialog: (state) => state.openEditToiletDialog,
+    selectMode: (state) => state.mode,
+    selectOpenToiletDetails: (state) => state.openToiletDetails,
   },
   reducers: {
     setToiletPosition: (state, action) => {
@@ -44,23 +50,20 @@ export const mapSlice = createSlice({
     disableSelectToiletLocation: (state) => {
       state.isSelectingToiletLocation = false;
     },
-    openAddToiletDialog: (state) => {
-      state.isAddToiletDialogOpen = true;
+    setOpenAddToiletDialog: (state, action) => {
+      state.openAddToiletDialog = action.payload;
     },
-    closeAddToiletDialog: (state) => {
-      state.isAddToiletDialogOpen = false;
+    setOpenEditToiletDialog: (state, action) => {
+      state.openEditToiletDialog = action.payload;
     },
-    setIsAddToiletDialogOpen: (state, action) => {
-      state.isAddToiletDialogOpen = action.payload;
+    setAddMode: (state) => {
+      state.mode = "add";
     },
-    openEditToiletDialog: (state) => {
-      state.isEditToiletDialogOpen = true;
+    setEditMode: (state) => {
+      state.mode = "edit";
     },
-    closeEditToiletDialog: (state) => {
-      state.isEditToiletDialogOpen = false;
-    },
-    setIsEditToiletDialogOpen: (state, action) => {
-      state.isEditToiletDialogOpen = action.payload;
+    setOpenToiletDetails: (state, action) => {
+      state.openToiletDetails = action.payload;
     },
   },
 });
@@ -71,12 +74,11 @@ export const {
   setSelectedToilet,
   enableSelectToiletLocation,
   disableSelectToiletLocation,
-  openAddToiletDialog,
-  closeAddToiletDialog,
-  setIsAddToiletDialogOpen,
-  openEditToiletDialog,
-  closeEditToiletDialog,
-  setIsEditToiletDialogOpen,
+  setOpenAddToiletDialog,
+  setOpenEditToiletDialog,
+  setAddMode,
+  setEditMode,
+  setOpenToiletDetails,
 } = mapSlice.actions;
 export default mapSlice.reducer;
 
@@ -84,6 +86,8 @@ export const {
   selectToiletPosition,
   selectSelectedToilet,
   selectIsSelectingToiletLocation,
-  selectIsAddToiletDialogOpen,
-  selectIsEditToiletDialogOpen,
+  selectOpenAddToiletDialog,
+  selectOpenEditToiletDialog,
+  selectMode,
+  selectOpenToiletDetails,
 } = mapSlice.selectors;

@@ -1,12 +1,10 @@
 import axios from "axios";
 import { latLng, Map } from "leaflet";
 import { useRef } from "react";
-import { UseFormReturn } from "react-hook-form";
+import { useFormContext } from "react-hook-form";
 import { toast } from "sonner";
-import { InferType } from "yup";
 
 import { useAppDispatch, useAppSelector } from "@/app/hooks";
-import FormProvider from "@/common/components/hook-form";
 import useMediaQuery from "@/common/hooks/useMediaQuery";
 import {
   Dialog,
@@ -25,36 +23,35 @@ import {
 import { TOILET_SVC_URI } from "@/config/uris";
 import { cn } from "@/lib/utils";
 
+import { DEFAULT_TOILET_VALUES } from "../../constants/toiletValues";
 import {
-  closeAddToiletDialog,
   enableSelectToiletLocation,
   resetToiletPosition,
-  selectIsAddToiletDialogOpen,
-  setIsAddToiletDialogOpen,
+  selectOpenAddToiletDialog,
+  setOpenAddToiletDialog,
   setToiletPosition,
 } from "../../mapSlice";
-import { toiletSchema } from "../../schema/toiletSchema";
 import ToiletForm from "./ToiletForm";
 
 type AddToiletDialogProps = {
   map: Map | null;
-  methods: UseFormReturn<InferType<typeof toiletSchema>>;
 };
 
 const AddToiletDialog: React.FC<AddToiletDialogProps> = (props) => {
-  const { map, methods } = props;
+  const { map } = props;
 
-  const open = useAppSelector(selectIsAddToiletDialogOpen);
+  const open = useAppSelector(selectOpenAddToiletDialog);
   const dispatch = useAppDispatch();
   const skipResetRef = useRef(false);
   const isTablet = useMediaQuery("md");
 
-  const { watch, handleSubmit, reset } = methods;
+  const { watch, handleSubmit, reset } = useFormContext();
 
   const handleOpen = (isOpen: boolean) => {
-    dispatch(setIsAddToiletDialogOpen(isOpen));
+    dispatch(setOpenAddToiletDialog(isOpen));
+
     if (!isOpen && !skipResetRef.current) {
-      reset(); // reset form if closed not via Edit Map Location
+      reset(DEFAULT_TOILET_VALUES); // reset form if closed not via Edit Map Location
       dispatch(resetToiletPosition());
     }
     skipResetRef.current = false; // reset the flag after close
@@ -85,7 +82,7 @@ const AddToiletDialog: React.FC<AddToiletDialogProps> = (props) => {
       // TODO: Add new toilet marker
       console.log(response);
       toast.success("Toilet added successfully!");
-      dispatch(closeAddToiletDialog());
+      dispatch(setOpenAddToiletDialog(false));
     } catch (err) {
       console.error(err);
       toast.error("Something went wrong. Please try again later.");
@@ -103,16 +100,11 @@ const AddToiletDialog: React.FC<AddToiletDialogProps> = (props) => {
                 Know a loo we don't? Add it to the map!
               </DialogDescription>
             </DialogHeader>
-            <FormProvider
-              methods={methods}
-              onSubmit={onSubmit}
-              className="flex flex-col flex-1 overflow-hidden"
-            >
-              <ToiletForm
-                handleClose={() => dispatch(closeAddToiletDialog())}
-                handleSelectLocation={handleSelectLocation}
-              />
-            </FormProvider>
+            <ToiletForm
+              handleClose={() => dispatch(setOpenAddToiletDialog(false))}
+              handleSelectLocation={handleSelectLocation}
+              handleSubmit={onSubmit}
+            />
           </DialogContent>
         </Dialog>
       ) : (
@@ -128,16 +120,11 @@ const AddToiletDialog: React.FC<AddToiletDialogProps> = (props) => {
                 Know a loo we don't? Add it to the map!
               </DrawerDescription>
             </DrawerHeader>
-            <FormProvider
-              methods={methods}
-              onSubmit={onSubmit}
-              className="flex flex-col flex-1 overflow-hidden"
-            >
-              <ToiletForm
-                handleClose={() => dispatch(closeAddToiletDialog())}
-                handleSelectLocation={handleSelectLocation}
-              />
-            </FormProvider>
+            <ToiletForm
+              handleClose={() => dispatch(setOpenAddToiletDialog(false))}
+              handleSelectLocation={handleSelectLocation}
+              handleSubmit={onSubmit}
+            />
           </DrawerContent>
         </Drawer>
       )}

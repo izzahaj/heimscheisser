@@ -7,8 +7,7 @@ import {
   Pencil,
   VenusAndMars,
 } from "lucide-react";
-import { UseFormReturn } from "react-hook-form";
-import { InferType } from "yup";
+import { useFormContext } from "react-hook-form";
 
 import { useAppDispatch, useAppSelector } from "@/app/hooks";
 import useMediaQuery from "@/common/hooks/useMediaQuery";
@@ -30,47 +29,42 @@ import {
 } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
 
-import { BidetType, Gender } from "../../constants/toiletValues";
-import { openEditToiletDialog, selectSelectedToilet } from "../../mapSlice";
-import { toiletSchema } from "../../schema/toiletSchema";
+import {
+  selectOpenToiletDetails,
+  selectSelectedToilet,
+  setEditMode,
+  setOpenEditToiletDialog,
+  setOpenToiletDetails,
+} from "../../mapSlice";
+import { Toilet } from "../../types/Toilet.types";
 
 type ToiletDetailsProps = {
-  open: boolean;
-  setOpen: React.Dispatch<React.SetStateAction<boolean>>;
-  defaultValues: {
-    name: string;
-    latitude: number;
-    longitude: number;
-    description: string;
-    genders: Gender[];
-    hasHandicap: boolean;
-    hasBidet: boolean;
-    bidetTypes: BidetType[];
-    isPaid: boolean;
-  };
-  methods: UseFormReturn<InferType<typeof toiletSchema>>;
-  setMode: React.Dispatch<React.SetStateAction<"add" | "edit">>;
+  defaultValues: Omit<Toilet, "id">;
 };
 
 const ToiletDetails: React.FC<ToiletDetailsProps> = (props) => {
-  const { open, setOpen, defaultValues, setMode, methods } = props;
+  const { defaultValues } = props;
 
   const toilet = useAppSelector(selectSelectedToilet);
+  const open = useAppSelector(selectOpenToiletDetails);
   const dispatch = useAppDispatch();
-  const { reset } = methods;
+  const { reset } = useFormContext();
   const isTablet = useMediaQuery("md");
 
   const handleOpenEditDialog = () => {
-    setMode("edit");
-    dispatch(openEditToiletDialog());
+    dispatch(setEditMode());
+    dispatch(setOpenEditToiletDialog(true));
     reset(defaultValues);
-    setOpen(false);
   };
 
   return (
     <>
       {isTablet ? (
-        <Sheet modal={false} open={open} onOpenChange={setOpen}>
+        <Sheet
+          modal={false}
+          open={open}
+          onOpenChange={(open) => dispatch(setOpenToiletDetails(open))}
+        >
           <SheetContent
             side="left"
             onInteractOutside={(e) => e.preventDefault()}
@@ -141,7 +135,10 @@ const ToiletDetails: React.FC<ToiletDetailsProps> = (props) => {
           </SheetContent>
         </Sheet>
       ) : (
-        <Drawer open={open} onOpenChange={setOpen}>
+        <Drawer
+          open={open}
+          onOpenChange={(open) => dispatch(setOpenToiletDetails(open))}
+        >
           <DrawerContent
             className={cn(
               "overflow-hidden flex flex-col p-1 data-[vaul-drawer-direction=bottom]:max-h-[100vh]",

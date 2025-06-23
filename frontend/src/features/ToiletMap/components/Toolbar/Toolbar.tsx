@@ -9,8 +9,7 @@ import {
   Search,
 } from "lucide-react";
 import { useState } from "react";
-import { UseFormReturn } from "react-hook-form";
-import { InferType } from "yup";
+import { useFormContext } from "react-hook-form";
 
 import { useAppDispatch, useAppSelector } from "@/app/hooks";
 import { Button } from "@/components/ui/button";
@@ -20,36 +19,36 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 
+import { DEFAULT_TOILET_VALUES } from "../../constants/toiletValues";
 import {
   disableSelectToiletLocation,
-  openAddToiletDialog,
-  openEditToiletDialog,
   selectIsSelectingToiletLocation,
+  selectMode,
   selectToiletPosition,
+  setAddMode,
+  setOpenAddToiletDialog,
+  setOpenEditToiletDialog,
   setToiletPosition,
 } from "../../mapSlice";
-import { toiletSchema } from "../../schema/toiletSchema";
 
 type ToolbarProps = {
   map: Map | null;
   myPosition: LatLng | null;
   setMyPosition: React.Dispatch<React.SetStateAction<LatLng | null>>;
-  methods: UseFormReturn<InferType<typeof toiletSchema>>;
-  mode: "add" | "edit";
-  setMode: React.Dispatch<React.SetStateAction<"add" | "edit">>;
 };
 
 const Toolbar: React.FC<ToolbarProps> = (props) => {
-  const { map, myPosition, setMyPosition, methods, mode, setMode } = props;
+  const { map, myPosition, setMyPosition } = props;
 
   const [isLocating, setIsLocating] = useState(false);
   const isSelectingToiletLocation = useAppSelector(
     selectIsSelectingToiletLocation,
   );
+  const mode = useAppSelector(selectMode);
   const addToiletPosition = useAppSelector(selectToiletPosition);
   const dispatch = useAppDispatch();
 
-  const { watch, setValue } = methods;
+  const { watch, setValue, reset } = useFormContext();
 
   const handleFindMyLocation = () => {
     if (map) {
@@ -72,20 +71,21 @@ const Toolbar: React.FC<ToolbarProps> = (props) => {
 
   const handleAddToilet = () => {
     if (map) {
-      setMode("add");
+      reset(DEFAULT_TOILET_VALUES);
+      dispatch(setAddMode());
       const center = map.getCenter();
       setValue("latitude", center.lat);
       setValue("longitude", center.lng);
       dispatch(setToiletPosition({ lat: center.lat, lng: center.lng }));
-      dispatch(openAddToiletDialog());
+      dispatch(setOpenAddToiletDialog(true));
     }
   };
 
   const openToiletDialog = () => {
     if (mode === "add") {
-      dispatch(openAddToiletDialog());
+      dispatch(setOpenAddToiletDialog(true));
     } else {
-      dispatch(openEditToiletDialog());
+      dispatch(setOpenEditToiletDialog(true));
     }
   };
 

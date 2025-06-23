@@ -12,11 +12,10 @@ type MapProps = {
   setMap: React.Dispatch<React.SetStateAction<LeafletMap | null>>;
   map: LeafletMap | null;
   myPosition: LatLng | null;
-  setOpenDetails: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
 const Map: React.FC<MapProps> = (props) => {
-  const { setMap, map, myPosition, setOpenDetails } = props;
+  const { setMap, map, myPosition } = props;
 
   const toilets = useToiletFetcher(map);
 
@@ -41,11 +40,7 @@ const Map: React.FC<MapProps> = (props) => {
       <MyLocationMarker position={myPosition} />
       <SelectLocationMarker />
       {toilets.map((toilet) => (
-        <ToiletMarker
-          key={toilet.id}
-          toilet={toilet}
-          setOpenDetails={setOpenDetails}
-        />
+        <ToiletMarker key={toilet.id} toilet={toilet} />
       ))}
       <ToiletMarker
         toilet={{
@@ -62,7 +57,6 @@ const Map: React.FC<MapProps> = (props) => {
           hasHandicap: true,
           bidetTypes: [BidetType.HandHeld],
         }}
-        setOpenDetails={setOpenDetails}
       />
     </MapContainer>
   );

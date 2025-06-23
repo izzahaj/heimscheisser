@@ -24,3 +24,15 @@ const createOptionsFromEnum = <T extends StringEnum>(enumObj: T) => {
 
 export const genderOptions = createOptionsFromEnum(Gender);
 export const bidetTypeOptions = createOptionsFromEnum(BidetType);
+
+export const DEFAULT_TOILET_VALUES = {
+  name: "",
+  latitude: 0,
+  longitude: 0,
+  description: "",
+  genders: [],
+  hasHandicap: false,
+  hasBidet: false,
+  bidetTypes: [],
+  isPaid: false,
+};

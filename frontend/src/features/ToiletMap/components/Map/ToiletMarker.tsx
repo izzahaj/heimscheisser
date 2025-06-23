@@ -7,20 +7,27 @@ import { Marker } from "react-leaflet";
 
 import { useAppDispatch, useAppSelector } from "@/app/hooks";
 
-import { selectSelectedToilet, setSelectedToilet } from "../../mapSlice";
+import {
+  selectIsSelectingToiletLocation,
+  selectSelectedToilet,
+  setOpenToiletDetails,
+  setSelectedToilet,
+} from "../../mapSlice";
 import { Toilet } from "../../types/Toilet.types";
 
 type ToiletMarkerProps = {
   toilet: Toilet;
-  setOpenDetails: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
 const ToiletMarker: React.FC<ToiletMarkerProps> = (props) => {
-  const { toilet, setOpenDetails } = props;
+  const { toilet } = props;
   const [opacity, setOpacity] = useState(0.7);
   const markerRef = useRef<L.Marker>(null);
   const position = latLng(toilet.latitude, toilet.longitude);
   const selectedToilet = useAppSelector(selectSelectedToilet);
+  const isSelectingToiletLocation = useAppSelector(
+    selectIsSelectingToiletLocation,
+  );
   const dispatch = useAppDispatch();
 
   const icon = useMemo(() => {
@@ -36,26 +43,28 @@ const ToiletMarker: React.FC<ToiletMarkerProps> = (props) => {
   const eventHandlers: LeafletEventHandlerFnMap = useMemo(
     () => ({
       mouseover() {
-        setOpacity(1);
+        if (!isSelectingToiletLocation) {
+          setOpacity(1);
+        }
       },
       mouseout() {
         setOpacity(0.7);
       },
       click() {
         // TODO: delete toilet
-        if (selectedToilet !== toilet) {
+        if (!isSelectingToiletLocation && selectedToilet !== toilet) {
           dispatch(setSelectedToilet(toilet));
-          setOpenDetails(true);
+          dispatch(setOpenToiletDetails(true));
         }
       },
       keypress() {
-        if (selectedToilet !== toilet) {
+        if (!isSelectingToiletLocation && selectedToilet !== toilet) {
           dispatch(setSelectedToilet(toilet));
-          setOpenDetails(true);
+          dispatch(setOpenToiletDetails(true));
         }
       },
     }),
-    [selectedToilet, toilet, setOpenDetails, dispatch],
+    [selectedToilet, toilet, dispatch, isSelectingToiletLocation],
   );
 
   return (
@@ -65,7 +74,7 @@ const ToiletMarker: React.FC<ToiletMarkerProps> = (props) => {
         icon={icon}
         position={position}
         eventHandlers={eventHandlers}
-        riseOnHover
+        riseOnHover={!isSelectingToiletLocation}
         opacity={opacity}
         alt="toilet marker"
       />

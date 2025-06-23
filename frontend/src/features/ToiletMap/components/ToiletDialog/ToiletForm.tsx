@@ -21,10 +21,11 @@ import {
 type ToiletFormProps = {
   handleSelectLocation: VoidFunction;
   handleClose: VoidFunction;
+  handleSubmit: React.FormEventHandler<HTMLFormElement>;
 };
 
 const ToiletForm: React.FC<ToiletFormProps> = (props) => {
-  const { handleSelectLocation, handleClose } = props;
+  const { handleSelectLocation, handleClose, handleSubmit } = props;
 
   const {
     watch,
@@ -39,7 +40,11 @@ const ToiletForm: React.FC<ToiletFormProps> = (props) => {
   }, [watch, setValue]);
 
   return (
-    <>
+    <form
+      noValidate
+      onSubmit={handleSubmit}
+      className="flex flex-col flex-1 overflow-hidden"
+    >
       <div className="flex flex-col px-4 py-2 overflow-auto gap-5">
         <RHFInput
           type="text"
@@ -106,7 +111,7 @@ const ToiletForm: React.FC<ToiletFormProps> = (props) => {
           Submit
         </Button>
       </div>
-    </>
+    </form>
   );
 };
 
