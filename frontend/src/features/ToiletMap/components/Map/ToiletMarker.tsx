@@ -5,7 +5,7 @@ import { useMemo, useRef, useState } from "react";
 import ReactDOMServer from "react-dom/server";
 import { Marker } from "react-leaflet";
 
-import { useAppDispatch, useAppSelector } from "@/app/hooks";
+import { useAppDispatch, useAppSelector } from "@/redux/hooks";
 
 import {
   selectIsSelectingToiletLocation,

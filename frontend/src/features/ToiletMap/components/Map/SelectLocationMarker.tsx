@@ -2,7 +2,7 @@ import L, { LeafletEventHandlerFnMap } from "leaflet";
 import { useMemo, useRef } from "react";
 import { Marker, useMapEvents } from "react-leaflet";
 
-import { useAppDispatch, useAppSelector } from "@/app/hooks";
+import { useAppDispatch, useAppSelector } from "@/redux/hooks";
 
 import {
   selectIsSelectingToiletLocation,

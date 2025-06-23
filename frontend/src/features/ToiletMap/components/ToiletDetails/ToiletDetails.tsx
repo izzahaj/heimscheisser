@@ -9,7 +9,6 @@ import {
 } from "lucide-react";
 import { useFormContext } from "react-hook-form";
 
-import { useAppDispatch, useAppSelector } from "@/app/hooks";
 import useMediaQuery from "@/common/hooks/useMediaQuery";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -28,6 +27,7 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
+import { useAppDispatch, useAppSelector } from "@/redux/hooks";
 
 import {
   selectOpenToiletDetails,

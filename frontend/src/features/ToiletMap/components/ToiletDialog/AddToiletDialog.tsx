@@ -4,7 +4,6 @@ import { useRef } from "react";
 import { useFormContext } from "react-hook-form";
 import { toast } from "sonner";
 
-import { useAppDispatch, useAppSelector } from "@/app/hooks";
 import useMediaQuery from "@/common/hooks/useMediaQuery";
 import {
   Dialog,
@@ -22,6 +21,7 @@ import {
 } from "@/components/ui/drawer";
 import { TOILET_SVC_URI } from "@/config/uris";
 import { cn } from "@/lib/utils";
+import { useAppDispatch, useAppSelector } from "@/redux/hooks";
 
 import { DEFAULT_TOILET_VALUES } from "../../constants/toiletValues";
 import {

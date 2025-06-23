@@ -3,7 +3,6 @@ import { LatLng, Map as LeafletMap } from "leaflet";
 import { useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 
-import { useAppSelector } from "@/app/hooks";
 import { Form } from "@/components/ui/form";
 import { ToiletDetails } from "@/features/ToiletMap/components/ToiletDetails";
 import {
@@ -14,6 +13,7 @@ import { Toolbar } from "@/features/ToiletMap/components/Toolbar";
 import { DEFAULT_TOILET_VALUES } from "@/features/ToiletMap/constants/toiletValues";
 import { selectSelectedToilet } from "@/features/ToiletMap/mapSlice";
 import { toiletSchema } from "@/features/ToiletMap/schema/toiletSchema";
+import { useAppSelector } from "@/redux/hooks";
 
 import { Map } from "../features/ToiletMap/components/Map";
 

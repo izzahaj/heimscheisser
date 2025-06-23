@@ -11,13 +11,13 @@ import {
 import { useState } from "react";
 import { useFormContext } from "react-hook-form";
 
-import { useAppDispatch, useAppSelector } from "@/app/hooks";
 import { Button } from "@/components/ui/button";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { useAppDispatch, useAppSelector } from "@/redux/hooks";
 
 import { DEFAULT_TOILET_VALUES } from "../../constants/toiletValues";
 import {
