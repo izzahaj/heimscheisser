@@ -10,6 +10,7 @@ import {
 import { UseFormReturn } from "react-hook-form";
 import { InferType } from "yup";
 
+import { useAppDispatch, useAppSelector } from "@/app/hooks";
 import useMediaQuery from "@/common/hooks/useMediaQuery";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -30,14 +31,12 @@ import {
 import { cn } from "@/lib/utils";
 
 import { BidetType, Gender } from "../../constants/toiletValues";
+import { openEditToiletDialog, selectSelectedToilet } from "../../mapSlice";
 import { toiletSchema } from "../../schema/toiletSchema";
-import { Toilet } from "../../types/Toilet.types";
 
 type ToiletDetailsProps = {
   open: boolean;
   setOpen: React.Dispatch<React.SetStateAction<boolean>>;
-  toilet: Toilet | null;
-  setOpenEditDialog: React.Dispatch<React.SetStateAction<boolean>>;
   defaultValues: {
     name: string;
     latitude: number;
@@ -54,22 +53,16 @@ type ToiletDetailsProps = {
 };
 
 const ToiletDetails: React.FC<ToiletDetailsProps> = (props) => {
-  const {
-    open,
-    setOpen,
-    toilet,
-    setOpenEditDialog,
-    defaultValues,
-    setMode,
-    methods,
-  } = props;
+  const { open, setOpen, defaultValues, setMode, methods } = props;
 
+  const toilet = useAppSelector(selectSelectedToilet);
+  const dispatch = useAppDispatch();
   const { reset } = methods;
   const isTablet = useMediaQuery("md");
 
   const handleOpenEditDialog = () => {
     setMode("edit");
-    setOpenEditDialog(true);
+    dispatch(openEditToiletDialog());
     reset(defaultValues);
     setOpen(false);
   };

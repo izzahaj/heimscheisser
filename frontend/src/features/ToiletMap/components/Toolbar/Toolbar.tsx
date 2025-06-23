@@ -12,6 +12,7 @@ import { useState } from "react";
 import { UseFormReturn } from "react-hook-form";
 import { InferType } from "yup";
 
+import { useAppDispatch, useAppSelector } from "@/app/hooks";
 import { Button } from "@/components/ui/button";
 import {
   Tooltip,
@@ -19,40 +20,35 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 
+import {
+  disableSelectToiletLocation,
+  openAddToiletDialog,
+  openEditToiletDialog,
+  selectIsSelectingToiletLocation,
+  selectToiletPosition,
+  setToiletPosition,
+} from "../../mapSlice";
 import { toiletSchema } from "../../schema/toiletSchema";
 
 type ToolbarProps = {
   map: Map | null;
   myPosition: LatLng | null;
   setMyPosition: React.Dispatch<React.SetStateAction<LatLng | null>>;
-  isSelectingToiletLocation: boolean;
-  setIsSelectingToiletLocation: React.Dispatch<React.SetStateAction<boolean>>;
-  addToiletPosition: LatLng | null;
-  setAddToiletPosition: React.Dispatch<React.SetStateAction<LatLng | null>>;
-  setOpenAddToiletDialog: React.Dispatch<React.SetStateAction<boolean>>;
-  setOpenEditToiletDialog: React.Dispatch<React.SetStateAction<boolean>>;
   methods: UseFormReturn<InferType<typeof toiletSchema>>;
   mode: "add" | "edit";
   setMode: React.Dispatch<React.SetStateAction<"add" | "edit">>;
 };
 
 const Toolbar: React.FC<ToolbarProps> = (props) => {
-  const {
-    map,
-    myPosition,
-    setMyPosition,
-    isSelectingToiletLocation,
-    setIsSelectingToiletLocation,
-    addToiletPosition,
-    setAddToiletPosition,
-    setOpenAddToiletDialog,
-    setOpenEditToiletDialog,
-    methods,
-    mode,
-    setMode,
-  } = props;
+  const { map, myPosition, setMyPosition, methods, mode, setMode } = props;
 
   const [isLocating, setIsLocating] = useState(false);
+  const isSelectingToiletLocation = useAppSelector(
+    selectIsSelectingToiletLocation,
+  );
+  const addToiletPosition = useAppSelector(selectToiletPosition);
+  const dispatch = useAppDispatch();
+
   const { watch, setValue } = methods;
 
   const handleFindMyLocation = () => {
@@ -80,8 +76,16 @@ const Toolbar: React.FC<ToolbarProps> = (props) => {
       const center = map.getCenter();
       setValue("latitude", center.lat);
       setValue("longitude", center.lng);
-      setAddToiletPosition(center);
-      setOpenAddToiletDialog(true);
+      dispatch(setToiletPosition({ lat: center.lat, lng: center.lng }));
+      dispatch(openAddToiletDialog());
+    }
+  };
+
+  const openToiletDialog = () => {
+    if (mode === "add") {
+      dispatch(openAddToiletDialog());
+    } else {
+      dispatch(openEditToiletDialog());
     }
   };
 
@@ -89,15 +93,10 @@ const Toolbar: React.FC<ToolbarProps> = (props) => {
     if (map) {
       const position = latLng(watch("latitude")!, watch("longitude")!);
       map.flyTo(position, map.getZoom());
-      setAddToiletPosition(position);
+      dispatch(setToiletPosition({ lat: position.lat, lng: position.lng }));
 
-      if (mode === "add") {
-        setOpenAddToiletDialog(true);
-      } else {
-        setOpenEditToiletDialog(true);
-      }
-
-      setIsSelectingToiletLocation(false);
+      openToiletDialog();
+      dispatch(disableSelectToiletLocation());
     }
   };
 
@@ -106,15 +105,15 @@ const Toolbar: React.FC<ToolbarProps> = (props) => {
       map.flyTo(addToiletPosition!, map.getZoom());
       setValue("latitude", addToiletPosition!.lat);
       setValue("longitude", addToiletPosition!.lng);
-      setAddToiletPosition(addToiletPosition);
+      dispatch(
+        setToiletPosition({
+          lat: addToiletPosition!.lat,
+          lng: addToiletPosition!.lng,
+        }),
+      );
 
-      if (mode === "add") {
-        setOpenAddToiletDialog(true);
-      } else {
-        setOpenEditToiletDialog(true);
-      }
-
-      setIsSelectingToiletLocation(false);
+      openToiletDialog();
+      dispatch(disableSelectToiletLocation());
     }
   };
 

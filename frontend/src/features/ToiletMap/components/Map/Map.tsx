@@ -4,35 +4,19 @@ import { MapContainer, TileLayer, ZoomControl } from "react-leaflet";
 import { MIN_ZOOM } from "../../constants/mapValues";
 import { BidetType, Gender } from "../../constants/toiletValues";
 import useToiletFetcher from "../../hooks/useToiletFetcher";
-import { Toilet } from "../../types/Toilet.types";
-import AddToiletMarker from "./AddToiletMarker";
 import MyLocationMarker from "./MyLocationMarker";
+import SelectLocationMarker from "./SelectLocationMarker";
 import ToiletMarker from "./ToiletMarker";
 
 type MapProps = {
   setMap: React.Dispatch<React.SetStateAction<LeafletMap | null>>;
   map: LeafletMap | null;
   myPosition: LatLng | null;
-  setAddToiletPosition: React.Dispatch<React.SetStateAction<LatLng | null>>;
-  addToiletPosition: LatLng | null;
-  isActive: boolean;
-  selectedToilet: Toilet | null;
-  setSelectedToilet: React.Dispatch<React.SetStateAction<Toilet | null>>;
   setOpenDetails: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
 const Map: React.FC<MapProps> = (props) => {
-  const {
-    setMap,
-    map,
-    myPosition,
-    setAddToiletPosition,
-    addToiletPosition,
-    isActive,
-    setSelectedToilet,
-    selectedToilet,
-    setOpenDetails,
-  } = props;
+  const { setMap, map, myPosition, setOpenDetails } = props;
 
   const toilets = useToiletFetcher(map);
 
@@ -55,23 +39,15 @@ const Map: React.FC<MapProps> = (props) => {
       />
       <ZoomControl position="topright" />
       <MyLocationMarker position={myPosition} />
-      <AddToiletMarker
-        setPosition={setAddToiletPosition}
-        position={addToiletPosition}
-        isActive={isActive}
-      />
+      <SelectLocationMarker />
       {toilets.map((toilet) => (
         <ToiletMarker
           key={toilet.id}
           toilet={toilet}
-          position={[toilet.latitude, toilet.longitude]}
-          selectedToilet={selectedToilet}
-          setSelectedToilet={setSelectedToilet}
           setOpenDetails={setOpenDetails}
         />
       ))}
       <ToiletMarker
-        position={[1.3525, 103.8215]}
         toilet={{
           id: "toilet_id",
           name: "MacRitchie Reservoir Toilet long name sadjasldj lasjdkla ld dsadadasdadasdsa",
@@ -86,8 +62,6 @@ const Map: React.FC<MapProps> = (props) => {
           hasHandicap: true,
           bidetTypes: [BidetType.HandHeld],
         }}
-        selectedToilet={selectedToilet}
-        setSelectedToilet={setSelectedToilet}
         setOpenDetails={setOpenDetails}
       />
     </MapContainer>

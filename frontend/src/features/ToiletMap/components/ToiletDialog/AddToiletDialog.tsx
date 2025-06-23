@@ -1,10 +1,11 @@
 import axios from "axios";
-import { LatLng, latLng, Map } from "leaflet";
+import { latLng, Map } from "leaflet";
 import { useRef } from "react";
 import { UseFormReturn } from "react-hook-form";
 import { toast } from "sonner";
 import { InferType } from "yup";
 
+import { useAppDispatch, useAppSelector } from "@/app/hooks";
 import FormProvider from "@/common/components/hook-form";
 import useMediaQuery from "@/common/hooks/useMediaQuery";
 import {
@@ -24,37 +25,37 @@ import {
 import { TOILET_SVC_URI } from "@/config/uris";
 import { cn } from "@/lib/utils";
 
+import {
+  closeAddToiletDialog,
+  enableSelectToiletLocation,
+  resetToiletPosition,
+  selectIsAddToiletDialogOpen,
+  setIsAddToiletDialogOpen,
+  setToiletPosition,
+} from "../../mapSlice";
 import { toiletSchema } from "../../schema/toiletSchema";
 import ToiletForm from "./ToiletForm";
 
 type AddToiletDialogProps = {
-  open: boolean;
-  setOpen: React.Dispatch<React.SetStateAction<boolean>>;
   map: Map | null;
-  setToiletPosition: React.Dispatch<React.SetStateAction<LatLng | null>>;
-  setIsSelectingToiletLocation: React.Dispatch<React.SetStateAction<boolean>>;
   methods: UseFormReturn<InferType<typeof toiletSchema>>;
 };
 
 const AddToiletDialog: React.FC<AddToiletDialogProps> = (props) => {
-  const {
-    open,
-    setOpen,
-    map,
-    setToiletPosition,
-    setIsSelectingToiletLocation,
-    methods,
-  } = props;
+  const { map, methods } = props;
+
+  const open = useAppSelector(selectIsAddToiletDialogOpen);
+  const dispatch = useAppDispatch();
   const skipResetRef = useRef(false);
   const isTablet = useMediaQuery("md");
 
   const { watch, handleSubmit, reset } = methods;
 
   const handleOpen = (isOpen: boolean) => {
-    setOpen(isOpen);
+    dispatch(setIsAddToiletDialogOpen(isOpen));
     if (!isOpen && !skipResetRef.current) {
       reset(); // reset form if closed not via Edit Map Location
-      setToiletPosition(null);
+      dispatch(resetToiletPosition());
     }
     skipResetRef.current = false; // reset the flag after close
   };
@@ -62,9 +63,9 @@ const AddToiletDialog: React.FC<AddToiletDialogProps> = (props) => {
   const handleSelectLocation = () => {
     skipResetRef.current = true;
     if (map) {
-      setIsSelectingToiletLocation(true);
+      dispatch(enableSelectToiletLocation());
       const position = latLng(watch("latitude")!, watch("longitude")!);
-      setToiletPosition(position);
+      dispatch(setToiletPosition({ lat: position.lat, lng: position.lng }));
       map.flyTo(position, map.getZoom());
     }
   };
@@ -84,7 +85,7 @@ const AddToiletDialog: React.FC<AddToiletDialogProps> = (props) => {
       // TODO: Add new toilet marker
       console.log(response);
       toast.success("Toilet added successfully!");
-      setOpen(false);
+      dispatch(closeAddToiletDialog());
     } catch (err) {
       console.error(err);
       toast.error("Something went wrong. Please try again later.");
@@ -108,7 +109,7 @@ const AddToiletDialog: React.FC<AddToiletDialogProps> = (props) => {
               className="flex flex-col flex-1 overflow-hidden"
             >
               <ToiletForm
-                handleClose={() => setOpen(false)}
+                handleClose={() => dispatch(closeAddToiletDialog())}
                 handleSelectLocation={handleSelectLocation}
               />
             </FormProvider>
@@ -133,7 +134,7 @@ const AddToiletDialog: React.FC<AddToiletDialogProps> = (props) => {
               className="flex flex-col flex-1 overflow-hidden"
             >
               <ToiletForm
-                handleClose={() => setOpen(false)}
+                handleClose={() => dispatch(closeAddToiletDialog())}
                 handleSelectLocation={handleSelectLocation}
               />
             </FormProvider>

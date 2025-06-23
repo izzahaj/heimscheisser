@@ -1,30 +1,27 @@
 import { faToilet } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import L, { LatLng, LeafletEventHandlerFnMap } from "leaflet";
+import L, { latLng, LeafletEventHandlerFnMap } from "leaflet";
 import { useMemo, useRef, useState } from "react";
 import ReactDOMServer from "react-dom/server";
 import { Marker } from "react-leaflet";
 
+import { useAppDispatch, useAppSelector } from "@/app/hooks";
+
+import { selectSelectedToilet, setSelectedToilet } from "../../mapSlice";
 import { Toilet } from "../../types/Toilet.types";
 
 type ToiletMarkerProps = {
-  position: LatLng | null;
-  setSelectedToilet: React.Dispatch<React.SetStateAction<Toilet | null>>;
   toilet: Toilet;
-  selectedToilet: Toilet | null;
   setOpenDetails: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
 const ToiletMarker: React.FC<ToiletMarkerProps> = (props) => {
-  const {
-    position,
-    toilet,
-    selectedToilet,
-    setSelectedToilet,
-    setOpenDetails,
-  } = props;
+  const { toilet, setOpenDetails } = props;
   const [opacity, setOpacity] = useState(0.7);
   const markerRef = useRef<L.Marker>(null);
+  const position = latLng(toilet.latitude, toilet.longitude);
+  const selectedToilet = useAppSelector(selectSelectedToilet);
+  const dispatch = useAppDispatch();
 
   const icon = useMemo(() => {
     return L.divIcon({
@@ -45,20 +42,20 @@ const ToiletMarker: React.FC<ToiletMarkerProps> = (props) => {
         setOpacity(0.7);
       },
       click() {
-        // TODO: edit + delete toilet
+        // TODO: delete toilet
         if (selectedToilet !== toilet) {
-          setSelectedToilet(toilet);
+          dispatch(setSelectedToilet(toilet));
           setOpenDetails(true);
         }
       },
       keypress() {
         if (selectedToilet !== toilet) {
-          setSelectedToilet(toilet);
+          dispatch(setSelectedToilet(toilet));
           setOpenDetails(true);
         }
       },
     }),
-    [selectedToilet, toilet, setSelectedToilet, setOpenDetails],
+    [selectedToilet, toilet, setOpenDetails, dispatch],
   );
 
   return (

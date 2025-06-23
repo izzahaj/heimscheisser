@@ -1,10 +1,11 @@
 import axios from "axios";
-import { LatLng, latLng, Map } from "leaflet";
+import { latLng, Map } from "leaflet";
 import { useRef } from "react";
 import { UseFormReturn } from "react-hook-form";
 import { toast } from "sonner";
 import { InferType } from "yup";
 
+import { useAppDispatch, useAppSelector } from "@/app/hooks";
 import FormProvider from "@/common/components/hook-form";
 import useMediaQuery from "@/common/hooks/useMediaQuery";
 import { filterChangedFormFields } from "@/common/utils/utils";
@@ -23,35 +24,32 @@ import {
 import { TOILET_SVC_URI } from "@/config/uris";
 import { cn } from "@/lib/utils";
 
+import {
+  closeEditToiletDialog,
+  enableSelectToiletLocation,
+  resetToiletPosition,
+  selectIsEditToiletDialogOpen,
+  selectSelectedToilet,
+  setIsEditToiletDialogOpen,
+  setToiletPosition,
+} from "../../mapSlice";
 import { toiletSchema } from "../../schema/toiletSchema";
 import { Toilet } from "../../types/Toilet.types";
 import ToiletForm from "./ToiletForm";
 
 type EditToiletDialogProps = {
-  toilet: Toilet | null;
-  open: boolean;
-  setOpen: React.Dispatch<React.SetStateAction<boolean>>;
   map: Map | null;
-  setToiletPosition: React.Dispatch<React.SetStateAction<LatLng | null>>;
-  setIsSelectingToiletLocation: React.Dispatch<React.SetStateAction<boolean>>;
   methods: UseFormReturn<InferType<typeof toiletSchema>>;
   setOpenToiletDetails: React.Dispatch<React.SetStateAction<boolean>>;
   defaultValues: Omit<Toilet, "id">;
 };
 
 const EditToiletDialog: React.FC<EditToiletDialogProps> = (props) => {
-  const {
-    toilet,
-    open,
-    setOpen,
-    map,
-    setToiletPosition,
-    setIsSelectingToiletLocation,
-    methods,
-    setOpenToiletDetails,
-    defaultValues,
-  } = props;
+  const { map, methods, setOpenToiletDetails, defaultValues } = props;
 
+  const open = useAppSelector(selectIsEditToiletDialogOpen);
+  const toilet = useAppSelector(selectSelectedToilet);
+  const dispatch = useAppDispatch();
   const skipResetRef = useRef(false);
   const isTablet = useMediaQuery("md");
 
@@ -63,11 +61,11 @@ const EditToiletDialog: React.FC<EditToiletDialogProps> = (props) => {
   } = methods;
 
   const handleOpen = (isOpen: boolean) => {
-    setOpen(isOpen);
+    dispatch(setIsEditToiletDialogOpen(isOpen));
 
     if (!isOpen && !skipResetRef.current) {
       reset(defaultValues); // reset form if closed not via Edit Map Location
-      setToiletPosition(null);
+      dispatch(resetToiletPosition());
       setOpenToiletDetails(!isOpen);
     }
     skipResetRef.current = false; // reset the flag after close
@@ -76,9 +74,9 @@ const EditToiletDialog: React.FC<EditToiletDialogProps> = (props) => {
   const handleSelectLocation = () => {
     skipResetRef.current = true;
     if (map) {
-      setIsSelectingToiletLocation(true);
+      dispatch(enableSelectToiletLocation());
       const position = latLng(watch("latitude")!, watch("longitude")!);
-      setToiletPosition(position);
+      dispatch(setToiletPosition({ lat: position.lat, lng: position.lng }));
       map.flyTo(position, map.getZoom());
     }
   };
@@ -98,7 +96,7 @@ const EditToiletDialog: React.FC<EditToiletDialogProps> = (props) => {
       // TODO: Add new toilet marker
       console.log(response);
       toast.success("Toilet edited successfully!");
-      setOpen(false);
+      dispatch(closeEditToiletDialog());
     } catch (err) {
       console.error(err);
       toast.error("Something went wrong. Please try again later.");
@@ -122,7 +120,7 @@ const EditToiletDialog: React.FC<EditToiletDialogProps> = (props) => {
               className="flex flex-col flex-1 overflow-hidden"
             >
               <ToiletForm
-                handleClose={() => setOpen(false)}
+                handleClose={() => dispatch(closeEditToiletDialog())}
                 handleSelectLocation={handleSelectLocation}
               />
             </FormProvider>
@@ -145,7 +143,7 @@ const EditToiletDialog: React.FC<EditToiletDialogProps> = (props) => {
               className="flex flex-col flex-1 overflow-hidden"
             >
               <ToiletForm
-                handleClose={() => setOpen(false)}
+                handleClose={() => dispatch(closeEditToiletDialog())}
                 handleSelectLocation={handleSelectLocation}
               />
             </FormProvider>

@@ -29,14 +29,14 @@ const ToiletForm: React.FC<ToiletFormProps> = (props) => {
   const {
     watch,
     setValue,
-    formState: { isSubmitting },
+    formState: { isSubmitting, isDirty },
   } = useFormContext();
 
   useEffect(() => {
     if (!watch("hasBidet")) {
       setValue("bidetTypes", []);
     }
-  }, [watch("hasBidet")]);
+  }, [watch, setValue]);
 
   return (
     <>
@@ -100,7 +100,7 @@ const ToiletForm: React.FC<ToiletFormProps> = (props) => {
         <Button
           type="submit"
           className="flex-1 md:flex-0 flex flex-row gap-2 items-center"
-          disabled={isSubmitting}
+          disabled={isSubmitting || !isDirty}
         >
           {isSubmitting && <Loader className="h-5 w-5 animate-spin" />}
           Submit

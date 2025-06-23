@@ -4,30 +4,24 @@ import { useMemo, useState } from "react";
 import { Resolver, useForm } from "react-hook-form";
 import { InferType } from "yup";
 
+import { useAppSelector } from "@/app/hooks";
 import { ToiletDetails } from "@/features/ToiletMap/components/ToiletDetails";
 import {
   AddToiletDialog,
   EditToiletDialog,
 } from "@/features/ToiletMap/components/ToiletDialog";
 import { Toolbar } from "@/features/ToiletMap/components/Toolbar";
+import { selectSelectedToilet } from "@/features/ToiletMap/mapSlice";
 import { toiletSchema } from "@/features/ToiletMap/schema/toiletSchema";
-import { Toilet } from "@/features/ToiletMap/types/Toilet.types";
 
 import { Map } from "../features/ToiletMap/components/Map";
 
 const MapPage = () => {
   const [map, setMap] = useState<LeafletMap | null>(null);
   const [myPosition, setMyPosition] = useState<LatLng | null>(null);
-  const [addToiletPosition, setAddToiletPosition] = useState<LatLng | null>(
-    null,
-  );
-  const [isSelectingToiletLocation, setIsSelectingToiletLocation] =
-    useState(false);
-  const [openAddToiletDialog, setOpenAddToiletDialog] = useState(false);
-  const [toilet, setToilet] = useState<Toilet | null>(null);
   const [openToiletDetails, setOpenToiletDetails] = useState(false);
-  const [openEditToiletDialog, setOpenEditToiletDialog] = useState(false);
   const [mode, setMode] = useState<"add" | "edit">("add");
+  const toilet = useAppSelector(selectSelectedToilet);
 
   const defaultValues = {
     name: "",
@@ -76,42 +70,19 @@ const MapPage = () => {
         setMap={setMap}
         map={map}
         myPosition={myPosition}
-        setAddToiletPosition={setAddToiletPosition}
-        addToiletPosition={addToiletPosition}
-        isActive={isSelectingToiletLocation}
-        setSelectedToilet={setToilet}
-        selectedToilet={toilet}
         setOpenDetails={setOpenToiletDetails}
       />
       <Toolbar
         map={map}
         myPosition={myPosition}
         setMyPosition={setMyPosition}
-        isSelectingToiletLocation={isSelectingToiletLocation}
-        setIsSelectingToiletLocation={setIsSelectingToiletLocation}
-        addToiletPosition={addToiletPosition}
-        setAddToiletPosition={setAddToiletPosition}
-        setOpenAddToiletDialog={setOpenAddToiletDialog}
-        setOpenEditToiletDialog={setOpenEditToiletDialog}
         methods={mode === "add" ? methods : editMethods}
         mode={mode}
         setMode={setMode}
       />
-      <AddToiletDialog
-        open={openAddToiletDialog}
-        setOpen={setOpenAddToiletDialog}
-        map={map}
-        setToiletPosition={setAddToiletPosition}
-        setIsSelectingToiletLocation={setIsSelectingToiletLocation}
-        methods={methods}
-      />
+      <AddToiletDialog map={map} methods={methods} />
       <EditToiletDialog
-        toilet={toilet}
-        open={openEditToiletDialog}
-        setOpen={setOpenEditToiletDialog}
         map={map}
-        setToiletPosition={setAddToiletPosition}
-        setIsSelectingToiletLocation={setIsSelectingToiletLocation}
         methods={editMethods}
         setOpenToiletDetails={setOpenToiletDetails}
         defaultValues={defaultEditValues}
@@ -119,8 +90,6 @@ const MapPage = () => {
       <ToiletDetails
         open={openToiletDetails}
         setOpen={setOpenToiletDetails}
-        toilet={toilet}
-        setOpenEditDialog={setOpenEditToiletDialog}
         methods={editMethods}
         defaultValues={defaultEditValues}
         setMode={setMode}
