@@ -1,11 +1,13 @@
-import axios from "axios";
 import { LatLngBounds, latLngBounds, Map as LeafletMap } from "leaflet";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef } from "react";
+import { toast } from "sonner";
 import { useDebouncedCallback } from "use-debounce";
 
-import { TOILET_SVC_NEARBY_URI } from "@/config/uris";
+import { useAppDispatch, useAppSelector } from "@/redux/hooks";
+import { useLazyGetNearbyToiletsQuery } from "@/services/Toilet/ToiletService";
 
 import { MIN_ZOOM } from "../constants/mapValues";
+import { addToilets, selectToilets } from "../mapSlice";
 import { Toilet } from "../types/Toilet.types";
 
 type Tile = {
@@ -16,30 +18,6 @@ type Tile = {
 
 const getTileKey = (tile: Tile) => {
   return `${tile.z}-${tile.x}-${tile.y}`;
-};
-
-const fetchToiletsInBounds = async (bounds: LatLngBounds) => {
-  const min = bounds.getSouthWest();
-  const max = bounds.getNorthEast();
-
-  const url = TOILET_SVC_NEARBY_URI;
-
-  const params = {
-    minLat: min.lat,
-    minLng: min.lng,
-    maxLat: max.lat,
-    maxLng: max.lng,
-  };
-
-  const config = { params };
-
-  try {
-    const response = await axios.get(url, config);
-    return response.data ?? [];
-  } catch (err) {
-    console.log(err);
-    return [];
-  }
 };
 
 // convert tile coordinates to LatLngBounds
@@ -93,40 +71,23 @@ const getTilesInBounds = (bounds: LatLngBounds, zoom: number) => {
 };
 
 const useToiletFetcher = (map: LeafletMap | null) => {
-  const [toilets, setToilets] = useState<Toilet[]>([]);
-  // keep track of overall fetched bounds (union of fetched tiles)
-  const fetchedBoundsRef = useRef<LatLngBounds | null>(null);
-  // keep track of which tiles have been fetched to avoid refetching
   const fetchedTilesRef = useRef<Set<string>>(new Set());
-  // track toilets by id to avoid duplicates
-  const toiletSet = useRef<Set<string>>(new Set());
+  const toilets = useAppSelector(selectToilets);
+  const dispatch = useAppDispatch();
 
-  const mergeToilets = useCallback((newToilets: Toilet[]) => {
-    const fresh = newToilets.filter(
-      (toilet) => !toiletSet.current.has(toilet.id),
-    );
-    fresh.forEach((toilet) => toiletSet.current.add(toilet.id));
-    setToilets((prev) => [...prev, ...fresh]);
-  }, []);
+  const [trigger] = useLazyGetNearbyToiletsQuery();
+
+  const mergeToilets = useCallback(
+    (newToilets: Toilet[]) => {
+      dispatch(addToilets(newToilets));
+    },
+    [dispatch],
+  );
 
   const shouldFetch = useCallback((tiles: Tile[]) => {
     return tiles.some((tile) => {
-      const key = `${tile.z}-${tile.x}-${tile.y}`;
-      return !fetchedTilesRef.current.has(key);
+      return !fetchedTilesRef.current.has(getTileKey(tile));
     });
-  }, []);
-
-  const updateFetched = useCallback((tiles: Tile[], bounds: LatLngBounds) => {
-    tiles.forEach((tile) => {
-      const key = getTileKey(tile);
-      fetchedTilesRef.current.add(key);
-    });
-
-    if (!fetchedBoundsRef.current) {
-      fetchedBoundsRef.current = bounds;
-    } else {
-      fetchedBoundsRef.current = fetchedBoundsRef.current.extend(bounds);
-    }
   }, []);
 
   const debouncedFetch = useDebouncedCallback(async (bounds: LatLngBounds) => {
@@ -153,13 +114,19 @@ const useToiletFetcher = (map: LeafletMap | null) => {
     );
 
     try {
-      const fetchedToilets = await fetchToiletsInBounds(bounds);
-      mergeToilets(fetchedToilets);
-      updateFetched(tilesToFetch, unionBounds);
-    } catch (error) {
-      console.error("Failed to fetch toilets:", error);
+      const { lat: minLat, lng: minLng } = unionBounds.getSouthWest();
+      const { lat: maxLat, lng: maxLng } = unionBounds.getNorthEast();
+      const result = await trigger({ minLat, minLng, maxLat, maxLng }).unwrap();
+
+      mergeToilets(result);
+      tilesToFetch.forEach((tile) => {
+        fetchedTilesRef.current.add(getTileKey(tile));
+      });
+    } catch (err) {
+      console.log(err);
+      toast.error("Failed to fetch toilets. Please try again later.");
     }
-  }, 800);
+  }, 900);
 
   const handleMapMoveEnd = useCallback(() => {
     if (!map) {

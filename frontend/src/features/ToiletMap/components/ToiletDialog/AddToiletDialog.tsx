@@ -1,4 +1,3 @@
-import axios from "axios";
 import { latLng, Map } from "leaflet";
 import { useRef } from "react";
 import { useFormContext } from "react-hook-form";
@@ -19,12 +18,14 @@ import {
   DrawerHeader,
   DrawerTitle,
 } from "@/components/ui/drawer";
-import { TOILET_SVC_URI } from "@/config/uris";
 import { cn } from "@/lib/utils";
 import { useAppDispatch, useAppSelector } from "@/redux/hooks";
+import { CreateToiletRequest } from "@/services/Toilet/Toilet.types";
+import { useCreateToiletMutation } from "@/services/Toilet/ToiletService";
 
 import { DEFAULT_TOILET_VALUES } from "../../constants/toiletValues";
 import {
+  addToilet,
   enableSelectToiletLocation,
   resetToiletPosition,
   selectOpenAddToiletDialog,
@@ -39,7 +40,7 @@ type AddToiletDialogProps = {
 
 const AddToiletDialog: React.FC<AddToiletDialogProps> = (props) => {
   const { map } = props;
-
+  const [createToilet] = useCreateToiletMutation();
   const open = useAppSelector(selectOpenAddToiletDialog);
   const dispatch = useAppDispatch();
   const skipResetRef = useRef(false);
@@ -69,18 +70,23 @@ const AddToiletDialog: React.FC<AddToiletDialogProps> = (props) => {
 
   const onSubmit = handleSubmit(async (data) => {
     console.log(data);
-
-    const url = TOILET_SVC_URI;
-    const config = {
-      headers: {
-        "Content-Type": "application/json",
-      },
+    const request: CreateToiletRequest = {
+      name: data.name,
+      description: data.description,
+      latitude: data.latitude,
+      longitude: data.longitude,
+      genders: data.genders,
+      hasHandicap: data.hasHandicap,
+      hasBidet: data.hasBidet,
+      bidetTypes: data.bidetTypes,
+      isPaid: data.isPaid,
     };
 
     try {
-      const response = await axios.post(url, data, config);
+      const newToilet = await createToilet(request).unwrap();
+      dispatch(addToilet(newToilet));
       // TODO: Add new toilet marker
-      console.log(response);
+      console.log(newToilet);
       toast.success("Toilet added successfully!");
       dispatch(setOpenAddToiletDialog(false));
     } catch (err) {

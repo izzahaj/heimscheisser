@@ -2,10 +2,11 @@ package validation
 
 import (
 	"fmt"
-	"github.com/go-playground/validator/v10"
-	"github.com/izzahaj/heimscheisser/toilet-service/internal/toilet/dto"
 	"reflect"
 	"strings"
+
+	"github.com/go-playground/validator/v10"
+	"github.com/izzahaj/heimscheisser/toilet-service/internal/toilet/dto"
 )
 
 var (
@@ -41,7 +42,7 @@ func InitValidator() error {
 func gendersValidator(fl validator.FieldLevel) bool {
 	val := fl.Field().String()
 	switch val {
-	case "male", "female", "gender-neutral":
+	case "Male", "Female", "Gender-neutral":
 		return true
 	default:
 		return false
@@ -51,7 +52,7 @@ func gendersValidator(fl validator.FieldLevel) bool {
 func bidetTypeValidator(fl validator.FieldLevel) bool {
 	val := fl.Field().String()
 	switch val {
-	case "hand-held", "attachment", "standalone":
+	case "Hand-held", "Attachment", "Standalone":
 		return true
 	default:
 		return false
@@ -124,9 +125,9 @@ func ParseValidationErrors(ve validator.ValidationErrors) map[string]string {
 		case "unique":
 			errorsMap[field] = fmt.Sprintf("%s must not contain duplicate values", field)
 		case "genders":
-			errorsMap[field] = fmt.Sprintf("%s must be one or more of [male, female, gender-neutral]", field)
+			errorsMap[field] = fmt.Sprintf("%s must be one or more of [Male, Female, Gender-neutral]", field)
 		case "bidettypes":
-			errorsMap[field] = fmt.Sprintf("%s can contaone none or more of [hand-held, attachment, standalone]", field)
+			errorsMap[field] = fmt.Sprintf("%s can contaone none or more of [Hand-held, Attachment, Standalone]", field)
 		default:
 			errorsMap[field] = fmt.Sprintf("%s is invalid", field)
 		}

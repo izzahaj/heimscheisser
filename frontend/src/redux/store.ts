@@ -1,11 +1,16 @@
-import { configureStore } from "@reduxjs/toolkit";
+import { combineReducers, configureStore } from "@reduxjs/toolkit";
 
-import { mapSlice } from "@/features/ToiletMap/mapSlice";
+import mapReducer from "@/features/ToiletMap/mapSlice";
+import { toiletApi } from "@/services/Toilet/ToiletService";
 
+const rootReducer = combineReducers({
+  map: mapReducer,
+  [toiletApi.reducerPath]: toiletApi.reducer,
+});
 export const store = configureStore({
-  reducer: {
-    map: mapSlice.reducer,
-  },
+  reducer: rootReducer,
+  middleware: (getDefaultMiddleware) =>
+    getDefaultMiddleware().concat(toiletApi.middleware),
 });
 
 export type RootState = ReturnType<typeof store.getState>;

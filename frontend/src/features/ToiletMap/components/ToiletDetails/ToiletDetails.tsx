@@ -4,14 +4,12 @@ import {
   Droplet,
   DropletOff,
   Droplets,
-  Pencil,
   VenusAndMars,
 } from "lucide-react";
-import { useFormContext } from "react-hook-form";
+import { useState } from "react";
 
 import useMediaQuery from "@/common/hooks/useMediaQuery";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import {
   Drawer,
   DrawerContent,
@@ -32,11 +30,11 @@ import { useAppDispatch, useAppSelector } from "@/redux/hooks";
 import {
   selectOpenToiletDetails,
   selectSelectedToilet,
-  setEditMode,
-  setOpenEditToiletDialog,
   setOpenToiletDetails,
 } from "../../mapSlice";
 import { Toilet } from "../../types/Toilet.types";
+import DeleteToiletDialog from "./DeleteToiletDialog";
+import EditButton from "./EditButton";
 
 type ToiletDetailsProps = {
   defaultValues: Omit<Toilet, "id">;
@@ -44,18 +42,11 @@ type ToiletDetailsProps = {
 
 const ToiletDetails: React.FC<ToiletDetailsProps> = (props) => {
   const { defaultValues } = props;
-
+  const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
   const toilet = useAppSelector(selectSelectedToilet);
   const open = useAppSelector(selectOpenToiletDetails);
   const dispatch = useAppDispatch();
-  const { reset } = useFormContext();
   const isTablet = useMediaQuery("md");
-
-  const handleOpenEditDialog = () => {
-    dispatch(setEditMode());
-    dispatch(setOpenEditToiletDialog(true));
-    reset(defaultValues);
-  };
 
   return (
     <>
@@ -123,14 +114,10 @@ const ToiletDetails: React.FC<ToiletDetailsProps> = (props) => {
                   </div>
                 </div>
               )}
-              <Button
-                className="self-center"
-                size="sm"
-                variant="outline"
-                onClick={handleOpenEditDialog}
-              >
-                <Pencil /> Edit
-              </Button>
+              <EditButton
+                defaultValues={defaultValues}
+                handleOpenDeleteToiletDialog={() => setOpenDeleteDialog(true)}
+              />
             </div>
           </SheetContent>
         </Sheet>
@@ -198,18 +185,18 @@ const ToiletDetails: React.FC<ToiletDetailsProps> = (props) => {
                   </div>
                 </div>
               )}
-              <Button
-                className="self-center"
-                size="sm"
-                variant="outline"
-                onClick={handleOpenEditDialog}
-              >
-                <Pencil /> Edit
-              </Button>
+              <EditButton
+                defaultValues={defaultValues}
+                handleOpenDeleteToiletDialog={() => setOpenDeleteDialog(true)}
+              />
             </div>
           </DrawerContent>
         </Drawer>
       )}
+      <DeleteToiletDialog
+        open={openDeleteDialog}
+        onOpenChange={setOpenDeleteDialog}
+      />
     </>
   );
 };

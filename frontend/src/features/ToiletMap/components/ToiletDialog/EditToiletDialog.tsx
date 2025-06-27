@@ -1,4 +1,3 @@
-import axios from "axios";
 import { latLng, Map } from "leaflet";
 import { useRef } from "react";
 import { useFormContext } from "react-hook-form";
@@ -18,9 +17,10 @@ import {
   DrawerHeader,
   DrawerTitle,
 } from "@/components/ui/drawer";
-import { TOILET_SVC_URI } from "@/config/uris";
 import { cn } from "@/lib/utils";
 import { useAppDispatch, useAppSelector } from "@/redux/hooks";
+import { UpdateToiletByIdRequest } from "@/services/Toilet/Toilet.types";
+import { useUpdateToiletByIdMutation } from "@/services/Toilet/ToiletService";
 
 import {
   enableSelectToiletLocation,
@@ -30,6 +30,7 @@ import {
   setOpenEditToiletDialog,
   setSelectedToilet,
   setToiletPosition,
+  updateToilet,
 } from "../../mapSlice";
 import { Toilet } from "../../types/Toilet.types";
 import ToiletForm from "./ToiletForm";
@@ -41,7 +42,7 @@ type EditToiletDialogProps = {
 
 const EditToiletDialog: React.FC<EditToiletDialogProps> = (props) => {
   const { map, defaultValues } = props;
-
+  const [updateToiletById] = useUpdateToiletByIdMutation();
   const open = useAppSelector(selectOpenEditToiletDialog);
   const toilet = useAppSelector(selectSelectedToilet);
   const dispatch = useAppDispatch();
@@ -79,19 +80,19 @@ const EditToiletDialog: React.FC<EditToiletDialogProps> = (props) => {
   const onSubmit = handleSubmit(async (data) => {
     const dirtyData = filterChangedFormFields(data, dirtyFields);
     console.log(dirtyData);
-    const url = `${TOILET_SVC_URI}/${toilet?.id}`;
-    const config = {
-      headers: {
-        "Content-Type": "application/json",
-      },
+
+    const request: UpdateToiletByIdRequest = {
+      id: toilet!.id,
+      ...dirtyData,
     };
 
     try {
-      const response = await axios.patch(url, dirtyData, config);
-      console.log(response);
+      const updatedToilet = await updateToiletById(request).unwrap();
+      dispatch(updateToilet(updatedToilet));
+      console.log(updatedToilet);
       toast.success("Toilet edited successfully!");
       dispatch(setOpenEditToiletDialog(false));
-      dispatch(setSelectedToilet(response.data));
+      dispatch(setSelectedToilet(updatedToilet));
       // TODO: Update all toilets with edited toilet
     } catch (err) {
       console.error(err);
