@@ -12,12 +12,14 @@ import {
 export const toiletApi = createApi({
   reducerPath: "toiletApi",
   baseQuery: fetchBaseQuery({ baseUrl: TOILET_SVC_URI }),
+  tagTypes: ["Toilet"],
   endpoints: (builder) => ({
     getNearbyToilets: builder.query<Toilet[], GetNearbvToiletsRequest>({
       query: ({ minLat, minLng, maxLat, maxLng }) => ({
         url: "/nearby",
         params: { minLat, minLng, maxLat, maxLng },
       }),
+      providesTags: [{ type: "Toilet" }],
     }),
     createToilet: builder.mutation<Toilet, CreateToiletRequest>({
       query: (createToiletRequestData) => ({

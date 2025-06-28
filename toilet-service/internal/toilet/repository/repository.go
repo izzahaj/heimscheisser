@@ -105,7 +105,11 @@ func (r *ToiletRepository) GetNearby(ctx context.Context, minLat, minLng, maxLat
 }
 
 func (r *ToiletRepository) GetByID(ctx context.Context, id uuid.UUID) (*model.Toilet, error) {
-	query := `SELECT * FROM toilets WHERE id = $1`
+	query := `
+		SELECT id, name, description, ST_Y(location::geometry) AS latitude, ST_X(location::geometry) AS longitude,
+		       genders, has_handicap, has_bidet, is_paid, bidet_types, created_at, updated_at
+		FROM toilets
+		WHERE id = $1`
 
 	var t model.Toilet
 
@@ -137,7 +141,7 @@ func (r *ToiletRepository) UpdateByID(ctx context.Context, id uuid.UUID, toilet 
 		    has_handicap = $6,
 		    has_bidet = $7,
 		    is_paid = $8,
-		    bidet_types = $9,
+		    bidet_types = $9
 		WHERE id = $10
 		RETURNING updated_at
 	`

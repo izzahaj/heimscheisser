@@ -79,7 +79,6 @@ const EditToiletDialog: React.FC<EditToiletDialogProps> = (props) => {
 
   const onSubmit = handleSubmit(async (data) => {
     const dirtyData = filterChangedFormFields(data, dirtyFields);
-    console.log(dirtyData);
 
     const request: UpdateToiletByIdRequest = {
       id: toilet!.id,
@@ -89,11 +88,9 @@ const EditToiletDialog: React.FC<EditToiletDialogProps> = (props) => {
     try {
       const updatedToilet = await updateToiletById(request).unwrap();
       dispatch(updateToilet(updatedToilet));
-      console.log(updatedToilet);
       toast.success("Toilet edited successfully!");
       dispatch(setOpenEditToiletDialog(false));
       dispatch(setSelectedToilet(updatedToilet));
-      // TODO: Update all toilets with edited toilet
     } catch (err) {
       console.error(err);
       toast.error("Something went wrong. Please try again later.");

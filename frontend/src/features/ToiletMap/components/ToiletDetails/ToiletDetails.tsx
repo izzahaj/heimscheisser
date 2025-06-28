@@ -86,9 +86,9 @@ const ToiletDetails: React.FC<ToiletDetailsProps> = (props) => {
               <div className="flex flex-row gap-5 items-center">
                 <Banknote />
                 {toilet?.isPaid ? (
-                  <p className="text-emerald-600">Free to use</p>
-                ) : (
                   <p className="text-red-600">Requires payment</p>
+                ) : (
+                  <p className="text-emerald-600">Free to use</p>
                 )}
               </div>
               <div className="flex flex-row gap-5 items-center">
@@ -104,7 +104,7 @@ const ToiletDetails: React.FC<ToiletDetailsProps> = (props) => {
                   </>
                 )}
               </div>
-              {toilet?.hasBidet && (toilet?.bidetTypes ?? [].length > 0) && (
+              {toilet?.hasBidet && toilet?.bidetTypes.length > 0 && (
                 <div className="flex flex-row gap-5 items-center">
                   <Droplets />
                   <div className="flex flex-row gap-1">
@@ -157,9 +157,9 @@ const ToiletDetails: React.FC<ToiletDetailsProps> = (props) => {
               <div className="flex flex-row gap-5 items-center">
                 <Banknote />
                 {toilet?.isPaid ? (
-                  <p className="text-emerald-600">Free to use</p>
-                ) : (
                   <p className="text-red-600">Requires payment</p>
+                ) : (
+                  <p className="text-emerald-600">Free to use</p>
                 )}
               </div>
               <div className="flex flex-row gap-5 items-center">
@@ -175,7 +175,7 @@ const ToiletDetails: React.FC<ToiletDetailsProps> = (props) => {
                   </>
                 )}
               </div>
-              {toilet?.hasBidet && (toilet?.bidetTypes ?? [].length > 0) && (
+              {toilet?.hasBidet && toilet?.bidetTypes.length > 0 && (
                 <div className="flex flex-row gap-5 items-center">
                   <Droplets />
                   <div className="flex flex-row gap-1">

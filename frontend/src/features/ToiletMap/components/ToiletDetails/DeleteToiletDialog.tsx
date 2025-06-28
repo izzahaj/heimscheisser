@@ -18,7 +18,7 @@ import {
   removeToilet,
   resetSelectedToilet,
   selectSelectedToilet,
-  setOpenEditToiletDialog,
+  setOpenToiletDetails,
 } from "../../mapSlice";
 
 type DeleteToiletDialogProps = {
@@ -37,8 +37,7 @@ const DeleteToiletDialog: React.FC<DeleteToiletDialogProps> = (props) => {
 
     try {
       await deleteToilet(toiletId).unwrap();
-      console.log(toilet);
-      dispatch(setOpenEditToiletDialog(false));
+      dispatch(setOpenToiletDetails(false));
       dispatch(resetSelectedToilet());
       dispatch(removeToilet(toiletId));
       toast.success("Toilet deleted successfully!");

@@ -1,9 +1,15 @@
 import { LatLng, Map as LeafletMap } from "leaflet";
+import { Loader } from "lucide-react";
+import { useEffect } from "react";
 import { MapContainer, TileLayer, ZoomControl } from "react-leaflet";
+
+import { useAppSelector } from "@/redux/hooks";
 
 import { MIN_ZOOM } from "../../constants/mapValues";
 import { BidetType, Gender } from "../../constants/toiletValues";
+import useInitialMapCenter from "../../hooks/useInitialMapCenter";
 import useToiletFetcher from "../../hooks/useToiletFetcher";
+import { selectToilets } from "../../mapSlice";
 import MyLocationMarker from "./MyLocationMarker";
 import SelectLocationMarker from "./SelectLocationMarker";
 import ToiletMarker from "./ToiletMarker";
@@ -16,14 +22,44 @@ type MapProps = {
 
 const Map: React.FC<MapProps> = (props) => {
   const { setMap, map, myPosition } = props;
+  const { center, isLoading } = useInitialMapCenter();
 
-  const toilets = useToiletFetcher(map);
+  useToiletFetcher(map);
+  const toilets = useAppSelector(selectToilets);
+
+  useEffect(() => {
+    if (!map) return;
+
+    const saveCenter = () => {
+      const c = map.getCenter();
+      localStorage.setItem(
+        "lastMapCenter",
+        JSON.stringify({ lat: c.lat, lng: c.lng }),
+      );
+      console.log(c);
+    };
+
+    map.on("moveend", saveCenter);
+
+    return () => {
+      map.off("moveend", saveCenter);
+    };
+  }, [map]);
+
+  if (isLoading) {
+    return (
+      <div className="h-full w-full flex items-center justify-center gap-3">
+        <Loader className="h-8 w-8 animate-spin" />
+        <h3 className="text-3xl">Loading map ...</h3>
+      </div>
+    );
+  }
 
   return (
     <MapContainer
       ref={setMap}
       className="h-full"
-      center={[1.3521, 103.8198]} // TODO: Cache last known coords OR current location
+      center={center} // TODO: Cache last known coords OR current location
       zoom={17}
       minZoom={MIN_ZOOM}
       scrollWheelZoom={true}

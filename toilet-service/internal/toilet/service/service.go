@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+
 	"github.com/google/uuid"
 	"github.com/izzahaj/heimscheisser/toilet-service/internal/toilet/dto"
 	toileterror "github.com/izzahaj/heimscheisser/toilet-service/internal/toilet/error"

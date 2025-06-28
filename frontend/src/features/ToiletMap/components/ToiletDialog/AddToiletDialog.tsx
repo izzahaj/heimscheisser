@@ -85,8 +85,6 @@ const AddToiletDialog: React.FC<AddToiletDialogProps> = (props) => {
     try {
       const newToilet = await createToilet(request).unwrap();
       dispatch(addToilet(newToilet));
-      // TODO: Add new toilet marker
-      console.log(newToilet);
       toast.success("Toilet added successfully!");
       dispatch(setOpenAddToiletDialog(false));
     } catch (err) {
